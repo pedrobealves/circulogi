@@ -384,6 +384,8 @@ function detectCollision(node: Node) {
 
       nodes[outputId].inputs.push(connectionNode.name);
 
+      console.log(nodes[outputId]);
+
       nextEdgeIndex.value++;
     });
 
@@ -396,8 +398,6 @@ function detectCollision(node: Node) {
     });
 
     Object.values(nodes).forEach((node) => (node.color = "black"));
-
-    //console.log(edges);
   }
 }
 
@@ -542,6 +542,8 @@ const eventHandlers: vNG.EventHandlers = {
       selectedNodes.value?.type !== "OUT"
     )
       return;
+
+    console.log(JSON.parse(JSON.stringify(layouts.value)).nodes);
     const colliding: string = isColliding(
       node[nodeToIgnore],
       JSON.parse(JSON.stringify(layouts.value)).nodes,

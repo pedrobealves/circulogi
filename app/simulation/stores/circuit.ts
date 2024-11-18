@@ -1,171 +1,121 @@
-import { nanoid } from "nanoid";
+import { NodeType } from "~/simulation/types/nodeType";
+import { NodeRole } from "~/simulation/types/nodeRole";
+import { useNodeFactory } from "@/simulation/composables/node-factory";
+import { useEdgeFactory } from "@/simulation/composables/edge-factory";
 import * as vNG from "v-network-graph";
+import type { Node } from "~/simulation/types/node";
 
-enum NodeType {
-  IN = "IN",
-  OUT = "OUT",
-  AND = "AND",
-  OR = "OR",
-  NOT = "NOT",
-  CONNECTION = "CONNECTION",
-}
+import { useNodesStore } from "./node";
+import { useEdgesStore } from "./edge";
 
-enum NodeRole {
-  INPUT = "INPUT",
-  OUTPUT = "OUTPUT",
-  COMPONENT = "COMPONENT", // Para portas lógicas ou outros elementos
-}
-
-interface Node extends vNG.Node {
-  size: number;
-  color: string;
-  label?: boolean;
-  id: string;
-  name: string;
-  type: string; // IN, AND, OR, OUT, etc.
-  role: string; // INPUT, OUTPUT, etc.
-  inputs: string[]; // IDs dos nós de entrada
-  outputs: string[]; // IDs dos nós de saída
-  maxInputs?: number; // Número máximo de entradas permitidas (ex.: AND: 2,
-  maxOutputs?: number; // Número máximo de saídas permitidas (geralmente 1)
-  value?: number | null;
-  delay?: number;
-}
-interface Edge extends vNG.Edge {
-  width: number;
-  color: string;
-  dashed?: boolean;
-}
+import { useComponentFactory } from "~/simulation/composables/component-factory";
 
 export const useCircuitStore = defineStore("circuit", () => {
-  // Estrutura de armazenamento dos nós e arestas
-  const nodes = reactive<Record<string, Node>>({});
-  const edges = reactive<Record<string, Edge>>({});
+  const nodesStore = useNodesStore();
+  const edgesStore = useEdgesStore();
+  const { createNode } = useNodeFactory();
+  const { createEdge } = useEdgeFactory();
+  const { createComponent } = useComponentFactory();
 
-  // Função para adicionar um novo nó
-  function addNode(node: Node) {
-    nodes[node.id] = node;
-  }
+  const selectedNodes = ref<Node>();
 
-  // Função para remover um nó e suas arestas associadas
-  function removeNode(nodeId: string) {
-    // Remover as arestas que têm o nó como origem ou destino
-    for (const edgeId in edges) {
-      const edge = edges[edgeId];
-      if (edge && (edge.source === nodeId || edge.target === nodeId)) {
-        delete edges[edgeId];
-      }
+  function createComponentAndAdd(type: NodeType) {
+    const component = createComponent(type);
+
+    if (component) {
+      const { mainNode, nodes, edges } = component;
+      nodesStore.addNode(mainNode);
+      nodes.forEach((node) => nodesStore.addNode(node));
+      edges.forEach((edge) => edgesStore.addEdge(edge));
     }
-    // Remover o próprio nó
-    delete nodes[nodeId];
   }
 
-  // Função para remover uma aresta específica
-  function removeEdge(edgeId: string) {
-    delete edges[edgeId];
+  function selectNode(nodeId: string) {
+    const node = nodesStore.getNode(nodeId);
+    selectedNodes.value = node;
   }
 
-  // Função para criar um componente básico, como AND
-  function createComponent(type: NodeType): Node {
-    const id = nanoid();
-    return {
-      id,
-      name: `${type} Component`,
-      type,
-      role: NodeRole.COMPONENT,
-      inputs: [],
-      outputs: [],
-      value: null,
-      delay: 0,
-    };
-  }
+  function connectionNodes(sourceNode: Node, targetNode: Node) {
+    if (sourceNode.role !== "COMPONENT" || targetNode.role !== "COMPONENT") {
+      console.log("Conexão inválida!");
+      return;
+    }
 
-  // Função para criar um nó de entrada
-  function createInputNode(): Node {
-    const id = nanoid();
-    return {
-      id,
-      name: "Input Node",
-      type: NodeType.IN,
-      role: NodeRole.INPUT,
-      inputs: [],
-      outputs: [],
-      value: 0,
-      delay: 0,
-    };
-  }
+    if (sourceNode.type === targetNode.type) {
+      console.log("Conexão inválida!");
+      return;
+    }
 
-  // Função para criar um nó de saída
-  function createOutputNode(): Node {
-    const id = nanoid();
-    return {
-      id,
-      name: "Output Node",
-      type: NodeType.OUT,
-      role: NodeRole.OUTPUT,
-      inputs: [],
-      outputs: [],
-      value: null,
-      delay: 0,
-    };
-  }
+    const sourceInputs =
+      sourceNode.type === "OUT" ? sourceNode.inputs : targetNode.inputs;
+    const targetOutputs =
+      sourceNode.type === "OUT" ? targetNode.outputs : sourceNode.outputs;
 
-  // Função para adicionar uma nova aresta (conexão)
-  function addEdge(edge: Edge) {
-    edges[edge.id] = edge;
-  }
+    //console.log(sourceInputs, targetOutputs);
 
-  // Função para conectar nós, removendo os nós de entrada/saída e criando um de conexão
-  function connectNodes(sourceId: string, targetId: string) {
-    const sourceNode = nodes[sourceId];
-    const targetNode = nodes[targetId];
+    if (sourceInputs[0] === targetOutputs[0]) {
+      console.log("Conexão inválida!");
+      return;
+    }
 
-    if (!sourceNode || !targetNode) return;
+    const connectionNode: Node = createNode(
+      NodeType.CONNECTION,
+      NodeRole.COMPONENT
+    );
 
-    const connectionNode: Node = {
-      id: nanoid(),
-      name: "Connection Node",
-      type: NodeType.CONNECTION,
-      role: NodeRole.COMPONENT,
-      inputs: [sourceNode.id],
-      outputs: [targetNode.id],
-      value: null,
-      delay: 0,
-    };
+    connectionNode.inputs.push(...sourceInputs); // O CONNECTION recebe a
+    connectionNode.outputs.push(...targetOutputs);
 
-    // Adicionar nó de conexão ao circuito
-    addNode(connectionNode);
+    nodesStore.addNode(connectionNode);
 
-    // Conectar arestas entre source → connection e connection → target
-    addEdge({
-      id: nanoid(),
-      source: sourceNode.id,
-      target: connectionNode.id,
-      color: "gray",
-      width: 8,
+    console.log(sourceInputs);
+
+    sourceInputs.forEach((inputId) => {
+      edgesStore.addEdge(createEdge(inputId, connectionNode.id));
+
+      const node = nodesStore.getNode(inputId);
+
+      if (node) {
+        node.outputs = node.outputs.filter(
+          (input) =>
+            input !==
+            (sourceNode.type === "OUT" ? sourceNode.id : targetNode.id)
+        );
+
+        node.outputs.push(connectionNode.id);
+      }
     });
 
-    addEdge({
-      id: nanoid(),
-      source: connectionNode.id,
-      target: targetNode.id,
-      color: "gray",
-      width: 8,
+    targetOutputs.forEach((outputId) => {
+      edgesStore.addEdge(createEdge(connectionNode.id, outputId));
+
+      const node = nodesStore.getNode(outputId);
+
+      console.log(node?.id);
+
+      if (node) {
+        node.inputs = node.inputs.filter(
+          (input) =>
+            input !==
+            (sourceNode.type === "OUT" ? targetNode.id : sourceNode.id)
+        );
+
+        node.inputs.push(connectionNode.id);
+      }
     });
 
-    // Atualizar as listas de outputs e inputs dos nós source e target
-    sourceNode.outputs.push(connectionNode.id);
-    targetNode.inputs.push(connectionNode.id);
+    nodesStore.removeNode(sourceNode.id);
+    nodesStore.removeNode(targetNode.id);
   }
 
   return {
-    nodes,
-    edges,
-    addNode,
-    addEdge,
-    createComponent,
-    createInputNode,
-    createOutputNode,
-    connectNodes,
+    createComponentAndAdd,
+    nodes: nodesStore.nodes,
+    edges: edgesStore.edges,
+    addNode: nodesStore.addNode,
+    layout: nodesStore.layouts,
+    connectionNodes,
+    selectNode,
+    selectedNodes,
   };
 });
