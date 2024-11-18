@@ -15,7 +15,12 @@ export function useNodeSelect() {
     const node = circuitStore.getNode(nodeId);
 
     // Retorna caso o nó não exista ou não seja do tipo "IN" ou "OUT"
-    if (!node || (node.type !== "IN" && node.type !== "OUT")) return;
+    if (
+      !node ||
+      (node.type !== "IN" && node.type !== "OUT") ||
+      node.role != "COMPONENT"
+    )
+      return;
 
     // Determina o tipo oposto do nó atual
     const targetType = node.type === NodeType.IN ? NodeType.OUT : NodeType.IN;
