@@ -86,7 +86,7 @@ export function useNodeCollision() {
 
     if (colliding !== "node") {
       currentColliding.value = colliding;
-      //console.log("Colisão detectada com o nó: ", colliding);
+      console.log("Colisão detectada com o nó: ", colliding);
       isCollisionDetectionInProgress.value = true; // Redefina a flag após a conclusão
     } else {
       isCollisionDetectionInProgress.value = false; // Redefina a flag após a conclusão

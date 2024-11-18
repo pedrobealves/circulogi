@@ -22,6 +22,8 @@ export const useCircuitStore = defineStore("circuit", () => {
 
   const selectedNodes = ref<Node>();
 
+  const isConnDetection = ref(false);
+
   function createComponentAndAdd(type: NodeType) {
     const component = createComponent(type);
 
@@ -106,6 +108,14 @@ export const useCircuitStore = defineStore("circuit", () => {
 
     nodesStore.removeNode(sourceNode.id);
     nodesStore.removeNode(targetNode.id);
+
+    isConnDetection.value = true;
+  }
+
+  function getNodesByType(type: NodeType): Node[] {
+    return Object.values(nodesStore.nodes).filter(
+      (node) => node.type === type && node.role === "COMPONENT"
+    );
   }
 
   function isComponent(node: Node): boolean {
@@ -126,5 +136,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     selectNode,
     selectedNodes,
     isComponent,
+    getNodesByType,
+    isConnDetection,
   };
 });
