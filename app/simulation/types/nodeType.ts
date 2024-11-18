@@ -8,5 +8,5 @@ export enum NodeType {
   NOT = "NOT",
   IN = "IN",
   OUT = "OUT",
-  CONNECTION = "CONNECTION",
+  CONN = "CONN",
 }

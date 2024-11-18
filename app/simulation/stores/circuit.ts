@@ -17,6 +17,9 @@ export const useCircuitStore = defineStore("circuit", () => {
   const { createEdge } = useEdgeFactory();
   const { createComponent } = useComponentFactory();
 
+  const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
+  const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
+
   const selectedNodes = ref<Node>();
 
   function createComponentAndAdd(type: NodeType) {
@@ -58,10 +61,7 @@ export const useCircuitStore = defineStore("circuit", () => {
       return;
     }
 
-    const connectionNode: Node = createNode(
-      NodeType.CONNECTION,
-      NodeRole.COMPONENT
-    );
+    const connectionNode: Node = createNode(NodeType.CONN, NodeRole.COMPONENT);
 
     connectionNode.inputs.push(...sourceInputs); // O CONNECTION recebe a
     connectionNode.outputs.push(...targetOutputs);
@@ -108,14 +108,23 @@ export const useCircuitStore = defineStore("circuit", () => {
     nodesStore.removeNode(targetNode.id);
   }
 
+  function isComponent(node: Node): boolean {
+    return (
+      !roleConditions.includes(node.role as NodeRole) &&
+      !typeConditions.includes(node.type as NodeType)
+    );
+  }
+
   return {
     createComponentAndAdd,
     nodes: nodesStore.nodes,
+    getNode: nodesStore.getNode,
     edges: edgesStore.edges,
     addNode: nodesStore.addNode,
     layout: nodesStore.layouts,
     connectionNodes,
     selectNode,
     selectedNodes,
+    isComponent,
   };
 });

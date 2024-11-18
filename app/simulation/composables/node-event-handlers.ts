@@ -1,10 +1,12 @@
 import * as vNG from "v-network-graph";
 import { useNodeCollision } from "./events/node-collision";
 import { useNodeSelect } from "./events/node-select";
+import { useLogicPropagation } from "./events/logic-propagation";
+
 export function useNodeEventHandlers() {
   const eventHandlers: vNG.EventHandlers = {
     "node:click": ({ node }) => {
-      //console.log(`Node ${node} click`);
+      useLogicPropagation().solve(node);
     },
     "node:pointerdown": ({ node }) => {
       useNodeSelect().selectNode(node);
