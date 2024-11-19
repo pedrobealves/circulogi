@@ -36,7 +36,7 @@ export function useNodeSelect() {
     // Salva as cores originais e altera para "blue" em um único loop
     nodeFiltered.forEach((node) => {
       nodesOriginalColors.set(node.id, node.color);
-      node.color = "blue";
+      node.color = "#1D62C9";
     });
   }
 

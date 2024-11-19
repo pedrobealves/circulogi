@@ -24,7 +24,7 @@ export function useNodeFactory() {
       maxOutputs,
       value: -1,
       size,
-      color: "black",
+      color: "#363636",
     };
   }
 

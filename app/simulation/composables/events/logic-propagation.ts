@@ -16,7 +16,7 @@ export function useLogicPropagation() {
 
     const userValue = inputNode.value === 1 ? 0 : 1;
     inputNode.value = userValue;
-    inputNode.color = inputNode.value === 1 ? "green" : "red";
+    inputNode.color = inputNode.value === 1 ? "#00AA11" : "#FF4D4D";
 
     const outputNodeId = inputNode.outputs[0];
 
@@ -72,9 +72,9 @@ export function useLogicPropagation() {
 
       // Atualizar a cor do nó com base no valor calculado
       if (currentNode.value === 1) {
-        currentNode.color = "green"; // Ativo
+        currentNode.color = "#00AA11"; // Ativo
       } else if (currentNode.value === 0) {
-        currentNode.color = "red"; // Inativo
+        currentNode.color = "#FF4D4D"; // Inativo
       }
 
       queue.push(...currentNode.outputs);
@@ -91,11 +91,11 @@ export function useLogicPropagation() {
       // Atualize a cor da aresta com base nos valores dos nós
       if (sourceNode && targetNode) {
         if (sourceNode.value === 1) {
-          edge.color = "green"; // Ativo
+          edge.color = "#00AA11"; // Ativo
         } else if (sourceNode.value === 0) {
-          edge.color = "red"; // Inativo
+          edge.color = "#FF4D4D"; // Inativo
         } else {
-          edge.color = "#808080"; // Padrão
+          edge.color = "#9B9B9B"; // Padrão
         }
       }
     });

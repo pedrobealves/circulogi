@@ -133,6 +133,7 @@ const showType = computed(() => (nodeId: any) => {
       />
     </template>
   </v-network-graph>
+  <InteractiveContainer />
 </template>
 
 <style>
@@ -145,6 +146,7 @@ const showType = computed(() => (nodeId: any) => {
 html,
 body,
 #__nuxt {
+  background-color: #f3f3f3;
   height: 100dvh;
   width: 100dvw;
   margin: 0;

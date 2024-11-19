@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.7.0",
     "d3-force": "^3.0.0",
+    "gsap": "^3.12.5",
     "nanoid": "^5.0.8",
     "nuxt": "^3.14.159",
     "nuxt-workers": "^0.0.3",

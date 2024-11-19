@@ -6,7 +6,7 @@ export function useEdgeFactory() {
     sourceId: string,
     targetId: string,
     width: number = 8,
-    color: string = "#808080"
+    color: string = "#9B9B9B"
   ): Edge {
     return {
       id: nanoid(),
