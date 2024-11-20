@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   },
 
   extends: ["app/auth", "app/simulation", "app/website", "app/common"],
-
   modules: ["@pinia/nuxt", "nuxt-workers", "@nuxtjs/tailwindcss"],
   pinia: {
     storesDirs: ["./stores/**"],

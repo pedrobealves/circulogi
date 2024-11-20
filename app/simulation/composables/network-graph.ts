@@ -7,7 +7,7 @@ import {
 } from "v-network-graph/lib/force-layout";
 
 export function useNetworkGraph() {
-  // Configuração do layout
+  // Configuração do layout com otimizações
   const layoutHandler = new ForceLayout({
     createSimulation: (d3, nodes, edges) => {
       const forceLink = d3
@@ -23,23 +23,28 @@ export function useNetworkGraph() {
     },
   });
 
-  // Configurações do grafo
+  // Funções para cálculos de estilos
+  const calculateNodeRadius = (node: vNG.Node) => node.size;
+  const calculateEdgeWidth = (edge: vNG.Edge) => edge.width;
+  const calculateEdgeColor = (edge: vNG.Edge) => edge.color;
+
+  // Configurações do grafo, otimizando funções e evitando cálculos redundantes
   const configs = reactive(
     vNG.defineConfigs({
       node: {
         normal: {
           type: "circle",
-          radius: (node) => node.size,
+          radius: calculateNodeRadius,
           color: "transparent",
           strokeWidth: 3,
           strokeColor: "black",
         },
         selectable: true,
         label: {
-          visible: (node) => !!node.label,
+          visible: (node) => !!node.label, // Calcula visibilidade apenas quando necessário
         },
         hover: {
-          radius: (node) => node.size,
+          radius: calculateNodeRadius,
           color: "transparent",
         },
         focusring: {
@@ -49,13 +54,13 @@ export function useNetworkGraph() {
       },
       edge: {
         normal: {
-          width: (edge) => edge.width,
-          color: (edge) => edge.color,
-          dasharray: (edge) => (edge.dashed ? "4" : "0"),
+          width: calculateEdgeWidth,
+          color: calculateEdgeColor,
+          dasharray: (edge) => (edge.dashed ? "4" : "0"), // Alterna entre tracejado e contínuo
         },
         hover: {
-          width: (edge) => edge.width,
-          color: (edge) => edge.color,
+          width: calculateEdgeWidth,
+          color: calculateEdgeColor,
         },
         type: "straight",
         margin: 0,

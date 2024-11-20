@@ -7,36 +7,6 @@ import { NodeRole } from "../types/nodeRole";
 
 const circuitStore = useCircuitStore();
 
-function addAndComponent() {
-  // Adiciona o componente do tipo AND ao circuito
-  circuitStore.createComponentAndAdd(NodeType.AND);
-}
-
-// Usando onMounted para adicionar o AND logo que o componente for montado
-onMounted(() => {
-  addAndComponent();
-});
-
-function addNewComponent() {
-  // Aqui você cria um novo componente (por exemplo, do tipo 'AND')
-  addAndComponent();
-}
-
-function addNewComponentIn() {
-  // Adiciona o componente do tipo IN ao circuito
-  circuitStore.createComponentAndAdd(NodeType.IN);
-}
-
-function addNewComponenOut() {
-  // Adiciona o componente do tipo OUT ao circuito
-  circuitStore.createComponentAndAdd(NodeType.OUT);
-}
-
-function addNewComponentOr() {
-  // Adiciona o componente do tipo OUT ao circuito
-  circuitStore.createComponentAndAdd(NodeType.OR);
-}
-
 const { configs } = useNetworkGraph();
 
 const { eventHandlers } = useNodeEventHandlers();
@@ -86,18 +56,6 @@ const showType = computed(() => (nodeId: any) => {
 </script>
 
 <template>
-  <button @click="addNewComponent" class="add-button">
-    Adicionar Componente AND
-  </button>
-  <button @click="addNewComponentOr" class="add-button">
-    Adicionar Componente OR
-  </button>
-  <button @click="addNewComponentIn" class="add-button">
-    Adicionar Componente IN
-  </button>
-  <button @click="addNewComponenOut" class="add-button">
-    Adicionar Componente OUT
-  </button>
   <v-network-graph
     class="graph"
     v-model:layouts="circuitStore.layout"

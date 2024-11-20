@@ -20,6 +20,11 @@ export const useCircuitStore = defineStore("circuit", () => {
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
   const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
 
+  const logicTypes: NodeType[] = Object.values(NodeType).filter(
+    (value) =>
+      value !== NodeType.IN && value !== NodeType.OUT && value !== NodeType.CONN
+  );
+
   const selectedNodes = ref<Node>();
 
   const isConnDetection = ref(false);
@@ -138,5 +143,6 @@ export const useCircuitStore = defineStore("circuit", () => {
     isComponent,
     getNodesByType,
     isConnDetection,
+    logicTypes,
   };
 });

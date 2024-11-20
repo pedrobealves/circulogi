@@ -62,6 +62,25 @@ export function useLogicPropagation() {
         case "NOT":
           currentNode.value = inputValues[0] === 1 ? 0 : 1;
           break;
+        case "XOR":
+          currentNode.value = inputValues
+            .filter((value): value is number => value !== undefined)
+            .reduce((acc, value) => acc ^ value, 0);
+          break;
+        case "NAND":
+          currentNode.value = inputValues.every((value) => value === 1) ? 0 : 1;
+          break;
+        case "NOR":
+          currentNode.value = inputValues.some((value) => value === 1) ? 0 : 1;
+          break;
+        case "XNOR":
+          currentNode.value =
+            inputValues
+              .filter((value): value is number => value !== undefined)
+              .reduce((acc, value) => acc ^ value, 0) === 0
+              ? 1
+              : 0;
+          break;
         case "OUT":
         case "CONN":
           currentNode.value = inputValues[0] ?? -1;

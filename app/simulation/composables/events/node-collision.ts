@@ -8,6 +8,7 @@ export function useNodeCollision() {
   const circuitStore = useCircuitStore();
 
   const nodes = circuitStore.nodes;
+  const layoutNodes = computed(() => circuitStore.layout.nodes);
 
   const collisionRadius: number = 50; // Raio de colisão, pode ser ajustado conforme necessário
 
@@ -16,8 +17,8 @@ export function useNodeCollision() {
   const currentColliding = ref<any>(null); // Variável para armazenar o nó atual
 
   interface NodePosition {
-    x: number;
-    y: number;
+    x?: number;
+    y?: number;
     type: string;
   }
 
@@ -52,9 +53,14 @@ export function useNodeCollision() {
 
       const nodePosition = nodesPosition[nodeId];
       if (!nodePosition) continue;
-      const distance = calculateDistance(targetNode, nodePosition);
-      if (distance <= collisionRadius) {
-        return nodeId; // Colisão detectada
+      if (nodePosition.x !== undefined && nodePosition.y !== undefined) {
+        const distance = calculateDistance(
+          targetNode,
+          nodePosition as vNG.Position
+        );
+        if (distance <= collisionRadius) {
+          return nodeId; // Colisão detectada
+        }
       }
     }
     return "node"; // Nenhuma colisão detectada
@@ -80,7 +86,7 @@ export function useNodeCollision() {
     //console.log(JSON.parse(JSON.stringify(circuitStore.layout)).nodes);
     const colliding: string = isColliding(
       targetNode,
-      JSON.parse(JSON.stringify(circuitStore.layout)).nodes,
+      layoutNodes.value,
       nodeToIgnore
     );
 
@@ -108,16 +114,11 @@ export function useNodeCollision() {
     }
   }
 
-  watch(
-    isCollisionDetectionInProgress,
-    (newValue, oldValue) => {
-      if ((newValue = !oldValue)) {
-        // A flag foi alterada para true, inicie a detecção de colisão
-        detectCollision(currentNode.value);
-      }
-    },
-    { immediate: false }
-  );
+  watch(isCollisionDetectionInProgress, (newValue) => {
+    if (newValue) {
+      detectCollision(currentNode.value);
+    }
+  });
 
   return {
     handleNodeCollision,

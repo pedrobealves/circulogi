@@ -4,7 +4,7 @@ export const useNodesStore = defineStore("nodes", () => {
   const nodes = reactive<Record<string, Node>>({});
 
   const layouts = reactive({
-    nodes: {} as Record<string, { type: string }>,
+    nodes: {} as Record<string, { type: string; x?: number; y?: number }>,
   });
 
   function addNode(node: Node) {
