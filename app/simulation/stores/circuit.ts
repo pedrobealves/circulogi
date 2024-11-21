@@ -19,6 +19,7 @@ export const useCircuitStore = defineStore("circuit", () => {
   const { createComponent } = useComponentFactory();
 
   const selectedAction = ref<Actions>();
+  const counter = ref(0);
 
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
   const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
@@ -35,6 +36,54 @@ export const useCircuitStore = defineStore("circuit", () => {
   const selectedNodes = ref<Node>();
 
   const isConnDetection = ref(false);
+
+  const operators: Record<NodeType, string> = {
+    [NodeType.AND]: "&",
+    [NodeType.OR]: "|",
+    [NodeType.XOR]: "^",
+    [NodeType.NAND]: "&",
+    [NodeType.NOR]: "|",
+    [NodeType.XNOR]: "^",
+    [NodeType.NOT]: "~", // Unário
+    [NodeType.IN]: "",
+    [NodeType.OUT]: "",
+    [NodeType.CONN]: "",
+  };
+
+  function generateNodeLabel(inputs: string[], type: NodeType): string {
+    if (inputs.length === 0) {
+      return type; // Caso não tenha inputs, retorna o tipo diretamente
+    }
+    const operator = operators[type] || "?"; // Se o tipo não tiver um operador definido, usa um placeholder
+
+    if (type === NodeType.NOT && inputs.length === 1) {
+      return `${operator}(${inputs[0]})`; // Para NOT, aplica o operador antes do único input
+    }
+
+    // Combinação para os operadores padrão (AND, OR, XOR)
+    const combinedInputs = inputs.join(` ${operator} `);
+
+    // Adiciona inversão para tipos com negação (NAND, NOR, XNOR)
+    if ([NodeType.NAND, NodeType.NOR, NodeType.XNOR].includes(type)) {
+      return `~(${combinedInputs})`;
+    }
+
+    return combinedInputs; // Retorna os inputs combinados para outros tipos
+  }
+
+  function generateLabel(): string {
+    let label = "";
+    let index = counter.value;
+
+    while (index >= 0) {
+      label = String.fromCharCode((index % 26) + 97) + label; // 97 é o código ASCII de 'a'
+      index = Math.floor(index / 26) - 1;
+    }
+
+    counter.value++;
+
+    return label;
+  }
 
   function createComponentAndAdd(type: NodeType) {
     const component = createComponent(type);
@@ -77,12 +126,13 @@ export const useCircuitStore = defineStore("circuit", () => {
 
     const connectionNode: Node = createNode(NodeType.CONN, NodeRole.COMPONENT);
 
+    connectionNode.label =
+      targetNode.type === NodeType.IN ? targetNode.label : sourceNode.label;
+
     connectionNode.inputs.push(...sourceInputs); // O CONNECTION recebe a
     connectionNode.outputs.push(...targetOutputs);
 
     nodesStore.addNode(connectionNode);
-
-    console.log(sourceInputs);
 
     sourceInputs.forEach((inputId) => {
       edgesStore.addEdge(createEdge(inputId, connectionNode.id));
@@ -274,5 +324,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     selectedAction,
     deleteComponent,
     deleteConnection,
+    generateLabel,
+    generateNodeLabel,
   };
 });

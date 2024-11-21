@@ -5,10 +5,12 @@ import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
 import { useNodeFactory } from "./node-factory";
 import { useEdgeFactory } from "./edge-factory";
+import { useCircuitStore } from "~/simulation/stores/circuit";
 
 export function useComponentFactory() {
   const { createNode } = useNodeFactory();
   const { createEdge } = useEdgeFactory();
+  const circuitStore = useCircuitStore();
 
   function createComponent(
     type: NodeType
@@ -38,7 +40,6 @@ export function useComponentFactory() {
     }
     return createComponentFunc();
   }
-
   // Função que cria um componente lógico padrão (AND, OR, etc.)
   function createDefaultComponent(
     type: NodeType,
@@ -52,9 +53,16 @@ export function useComponentFactory() {
 
     const inputNodes: Node[] = [];
     for (let i = 0; i < inputCount; i++) {
-      inputNodes.push(createNode(NodeType.IN, NodeRole.COMPONENT));
+      const inputNode = createNode(NodeType.IN, NodeRole.COMPONENT);
+      inputNode.label = circuitStore.generateLabel();
+      inputNodes.push(inputNode);
     }
     const outputNode = createNode(NodeType.OUT, NodeRole.COMPONENT); // O nó de saída
+
+    outputNode.label = circuitStore.generateNodeLabel(
+      [inputNodes[0]?.label ?? "", inputNodes[1]?.label ?? ""],
+      type
+    );
 
     // Criar as arestas para os nós de entrada e saída
     const edges: Edge[] = inputNodes.map((inputNode) =>
@@ -112,8 +120,6 @@ export function useComponentFactory() {
     nodes: Node[];
     edges: Edge[];
   } {
-    console.log("createNotComponent");
-
     const mainNode: Node = createNode(
       NodeType.NOT,
       NodeRole.COMPONENT,
@@ -124,6 +130,12 @@ export function useComponentFactory() {
 
     const inNode = createNode(NodeType.IN, NodeRole.COMPONENT);
     const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
+
+    inNode.label = circuitStore.generateLabel();
+    outNode.label = circuitStore.generateNodeLabel(
+      [inNode.label],
+      NodeType.NOT
+    );
 
     const edges: Edge[] = [
       createEdge(inNode.id, mainNode.id),

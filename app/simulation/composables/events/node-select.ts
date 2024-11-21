@@ -52,11 +52,64 @@ export function useNodeSelect() {
     nodesOriginalColors.clear();
   }
 
+  function updateLabels() {
+    // Função para atualizar o label de um nó, seja AND, OR, NOT, etc.
+    const updateNodeLabel = (node: any) => {
+      if (!node.inputs[0]) return;
+
+      const mainNode = circuitStore.getNode(node.inputs[0]);
+      if (!mainNode || !mainNode.inputs || mainNode.inputs.length < 1) return;
+
+      // Lógica para tratar o nó do tipo NOT
+      if (mainNode.type === NodeType.NOT && mainNode.inputs[0]) {
+        const inputNode = circuitStore.getNode(mainNode.inputs[0]);
+        if (inputNode) {
+          node.label = circuitStore.generateNodeLabel(
+            [inputNode.label ?? ""],
+            mainNode.type
+          );
+        }
+        return;
+      }
+
+      // Lógica para tratar nós binários (AND, OR, etc.)
+      if (
+        mainNode.inputs.length >= 2 &&
+        mainNode.inputs[0] &&
+        mainNode.inputs[1]
+      ) {
+        const inputNode1 = circuitStore.getNode(mainNode.inputs[0]);
+        const inputNode2 = circuitStore.getNode(mainNode.inputs[1]);
+        if (inputNode1 && inputNode2) {
+          node.label = circuitStore.generateNodeLabel(
+            [inputNode1.label ?? "", inputNode2.label ?? ""],
+            mainNode.type
+          );
+        }
+      }
+    };
+
+    // Atualiza os nós de tipo 'CONN' (conexão)
+    const nodes = circuitStore.getNodesByType(NodeType.CONN);
+    const reversedNodes = [...nodes].reverse();
+    reversedNodes.forEach(updateNodeLabel);
+
+    // Atualiza os nós de tipo 'OUT' (saída)
+    const nodesIn = circuitStore.getNodesByType(NodeType.OUT);
+    const reversedNodesIn = [...nodesIn].reverse();
+    reversedNodesIn.forEach((node) => {
+      if (node.role === "COMPONENT") {
+        updateNodeLabel(node);
+      }
+    });
+  }
+
   watch(
     connDetect,
     (newValue) => {
       if (newValue) {
         nodesConnDeHighlight();
+        updateLabels();
         circuitStore.isConnDetection = false;
       }
     },

@@ -6,7 +6,7 @@ import { NodeRole } from "./nodeRole"; // Importando NodeRole
 export interface Node extends vNG.Node {
   size: number;
   color: string;
-  label?: boolean;
+  label?: string;
   id: string;
   name: string;
   type: NodeType; // IN, AND, OR, OUT, etc.

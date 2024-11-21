@@ -41,7 +41,14 @@ export function useNetworkGraph() {
         },
         selectable: true,
         label: {
-          visible: (node) => !!node.label, // Calcula visibilidade apenas quando necessário
+          visible: (node) => !!node.label,
+          fontFamily: "Inter",
+          fontSize: 21,
+          lineHeight: 1.1,
+          color: "#9B9B9B",
+          margin: 6,
+          direction: "south",
+          text: "label",
         },
         hover: {
           radius: calculateNodeRadius,
