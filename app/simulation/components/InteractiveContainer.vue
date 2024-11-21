@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from "vue";
 import gsap from "gsap";
-import { throttle } from "lodash";
 import { NodeType } from "@/simulation/types/nodeType";
 import { useCircuitStore } from "@/simulation/stores/circuit";
 
@@ -65,6 +64,21 @@ const containerDimensions = [
   { width: 460, height: 290 },
   { width: 480, height: 204 },
 ];
+
+function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+): T {
+  let lastTime = 0;
+
+  return function (...args: any[]) {
+    const now = Date.now();
+    if (now - lastTime >= delay) {
+      lastTime = now;
+      func(...args);
+    }
+  } as T;
+}
 
 const animateContainer = throttle((config) => {
   gsap.to(container.value, config);

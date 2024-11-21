@@ -1,5 +1,4 @@
 import * as vNG from "v-network-graph";
-import { throttle } from "lodash"; // Importa o throttle do Lodash
 import { useNodeCollision } from "./events/node-collision";
 import { useNodeSelect } from "./events/node-select";
 import { useLogicPropagation } from "./events/logic-propagation";
@@ -11,6 +10,21 @@ export function useNodeEventHandlers() {
   const { handleNodeCollision } = useNodeCollision();
   const { selectNode, nodesConnDeHighlight, nodesConnHighlight } =
     useNodeSelect();
+
+  function throttle<T extends (...args: any[]) => void>(
+    func: T,
+    delay: number
+  ): T {
+    let lastTime = 0;
+
+    return function (...args: any[]) {
+      const now = Date.now();
+      if (now - lastTime >= delay) {
+        lastTime = now;
+        func(...args);
+      }
+    } as T;
+  }
 
   const { executeAction } = useActionsNode();
 
