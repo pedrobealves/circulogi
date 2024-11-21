@@ -4,6 +4,7 @@ import { useNodeFactory } from "@/simulation/composables/node-factory";
 import { useEdgeFactory } from "@/simulation/composables/edge-factory";
 import * as vNG from "v-network-graph";
 import type { Node } from "~/simulation/types/node";
+import { Actions } from "~/simulation/types/actions";
 
 import { useNodesStore } from "./node";
 import { useEdgesStore } from "./edge";
@@ -17,8 +18,14 @@ export const useCircuitStore = defineStore("circuit", () => {
   const { createEdge } = useEdgeFactory();
   const { createComponent } = useComponentFactory();
 
+  const selectedAction = ref<Actions>();
+
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
   const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
+
+  const setSelectedAction = (action: Actions) => {
+    selectedAction.value = action;
+  };
 
   const logicTypes: NodeType[] = Object.values(NodeType).filter(
     (value) =>
@@ -117,6 +124,61 @@ export const useCircuitStore = defineStore("circuit", () => {
     isConnDetection.value = true;
   }
 
+  function deleteConnection(connectionNode: Node) {
+    // Certificar-se de que o nó de conexão é realmente do tipo "CONN"
+    if (connectionNode.type !== "CONN") {
+      console.log("Nó de conexão inválido!");
+      return;
+    }
+
+    if (!connectionNode.inputs[0] || !connectionNode.outputs[0]) return;
+
+    // Recuperar os nós de entrada e saída relacionados
+    const sourceNode = nodesStore.getNode(connectionNode.inputs[0]);
+    const targetNode = nodesStore.getNode(connectionNode.outputs[0]);
+
+    if (!sourceNode || !targetNode) {
+      console.log("Nós de origem ou destino não encontrados!");
+      return;
+    }
+
+    const nodeIn = createNode(NodeType.IN, NodeRole.COMPONENT);
+    const nodeOut = createNode(NodeType.OUT, NodeRole.COMPONENT);
+
+    // Restaurar os nós de entrada e saída
+    // Restaurar as entradas do nó de origem
+    sourceNode.outputs = sourceNode.outputs.filter(
+      (outputId) => outputId !== connectionNode.id
+    );
+    sourceNode.outputs.push(nodeOut.id);
+
+    nodeIn.outputs.push(targetNode.id);
+
+    // Restaurar as saídas do nó de destino
+    targetNode.inputs = targetNode.inputs.filter(
+      (inputId) => inputId !== connectionNode.id
+    );
+    targetNode.inputs.push(nodeIn.id);
+
+    nodeOut.inputs.push(sourceNode.id);
+
+    nodesStore.addNode(nodeIn);
+    nodesStore.addNode(nodeOut);
+
+    // Remover as arestas associadas ao nó de conexão
+    edgesStore.removeEdge(sourceNode.id, connectionNode.id);
+    edgesStore.removeEdge(connectionNode.id, targetNode.id);
+
+    // Criar arestas novas para os nós de entrada e saída
+    edgesStore.addEdge(createEdge(sourceNode.id, nodeOut.id));
+    edgesStore.addEdge(createEdge(nodeIn.id, targetNode.id));
+
+    // Remover o nó de conexão da store de nós
+    nodesStore.removeNode(connectionNode.id);
+
+    console.log(`Nó de conexão ${connectionNode.id} removido com sucesso`);
+  }
+
   function getNodesByType(type: NodeType): Node[] {
     return Object.values(nodesStore.nodes).filter(
       (node) => node.type === type && node.role === "COMPONENT"
@@ -128,6 +190,70 @@ export const useCircuitStore = defineStore("circuit", () => {
       !roleConditions.includes(node.role as NodeRole) &&
       !typeConditions.includes(node.type as NodeType)
     );
+  }
+
+  function deleteComponent(mainNode: Node): void {
+    if (!mainNode) {
+      console.warn("Nó principal não fornecido!");
+      return;
+    }
+
+    const nodes = nodesStore.nodes;
+
+    // Verifica se há nós de conexão associados (entradas e saídas)
+    // Remover nós de conexão conectados às entradas do nó principal
+    mainNode.inputs.forEach((inputId) => {
+      const inputNode = nodesStore.getNode(inputId);
+      if (inputNode && inputNode.type === "CONN") {
+        // Se for um nó de tipo CONN, chama a função para removê-lo
+        deleteConnection(inputNode);
+      }
+    });
+
+    // Remover nós de conexão conectados às saídas do nó principal
+    mainNode.outputs.forEach((outputId) => {
+      const outputNode = nodesStore.getNode(outputId);
+      if (outputNode && outputNode.type === "CONN") {
+        // Se for um nó de tipo CONN, chama a função para removê-lo
+        deleteConnection(outputNode);
+      }
+    });
+
+    // Passo 1: Identificar os nós envolvidos no componente
+    const inputNodes = mainNode.inputs.map((inputId) => nodes[inputId]);
+    const outputNodes = mainNode.outputs.map((outputId) => nodes[outputId]);
+
+    // Passo 2: Remover as arestas que conectam os nós de entrada e saída
+    // Remover arestas de entrada
+    inputNodes.forEach((inputNode) => {
+      if (inputNode) {
+        inputNode.outputs = inputNode.outputs.filter(
+          (id) => id !== mainNode.id
+        );
+        // Remover as arestas correspondentes dos edges
+        edgesStore.removeEdge(inputNode.id, mainNode.id);
+      }
+    });
+
+    // Remover arestas de saída
+    outputNodes.forEach((outputNode) => {
+      if (outputNode) {
+        outputNode.inputs = outputNode.inputs.filter(
+          (id) => id !== mainNode.id
+        );
+        edgesStore.removeEdge(mainNode.id, outputNode.id);
+      }
+    });
+
+    // Passo 3: Remover as referências nos nós de entrada e saída
+    mainNode.inputs = [];
+    mainNode.outputs = [];
+
+    // Passo 4: Deletar o nó principal, nós de entrada e nós de saída
+    // Remover os nós do circuito
+    nodesStore.removeNode(mainNode.id);
+    inputNodes.forEach((node) => node && nodesStore.removeNode(node.id));
+    outputNodes.forEach((node) => node && nodesStore.removeNode(node.id));
   }
 
   return {
@@ -144,5 +270,9 @@ export const useCircuitStore = defineStore("circuit", () => {
     getNodesByType,
     isConnDetection,
     logicTypes,
+    setSelectedAction,
+    selectedAction,
+    deleteComponent,
+    deleteConnection,
   };
 });

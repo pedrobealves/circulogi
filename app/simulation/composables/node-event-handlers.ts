@@ -3,7 +3,7 @@ import { throttle } from "lodash"; // Importa o throttle do Lodash
 import { useNodeCollision } from "./events/node-collision";
 import { useNodeSelect } from "./events/node-select";
 import { useLogicPropagation } from "./events/logic-propagation";
-
+import { useActionsNode } from "./events/actions-node";
 // Função para otimizar o registro de manipuladores de eventos
 export function useNodeEventHandlers() {
   // Inicialize dependências fora dos manipuladores para evitar recriação repetitiva
@@ -12,6 +12,8 @@ export function useNodeEventHandlers() {
   const { selectNode, nodesConnDeHighlight, nodesConnHighlight } =
     useNodeSelect();
 
+  const { executeAction } = useActionsNode();
+
   // Usa o throttle do Lodash para limitar a frequência do evento
   const throttledHandleNodeCollision = throttle((node) => {
     handleNodeCollision(node);
@@ -19,7 +21,8 @@ export function useNodeEventHandlers() {
 
   const eventHandlers: vNG.EventHandlers = {
     "node:click": ({ node }) => {
-      solve(node); // Processamento lógico para o nó clicado
+      solve(node);
+      executeAction(node); // Processamento lógico para o nó clicado
     },
     "node:pointerdown": ({ node }) => {
       selectNode(node); // Seleciona o nó

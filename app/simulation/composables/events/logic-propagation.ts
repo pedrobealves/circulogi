@@ -2,11 +2,14 @@ import type { Node } from "~/simulation/types/node";
 import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
 import { useCircuitStore } from "@/simulation/stores/circuit";
+import { Actions } from "~/simulation/types/actions";
 
 export function useLogicPropagation() {
   const circuitStore = useCircuitStore();
 
   function solve(inputNodeId: string) {
+    if (circuitStore.selectedAction !== Actions.SELECT) return;
+
     const inputNode = circuitStore.getNode(inputNodeId);
 
     if (inputNode?.role !== NodeRole.INPUT) {

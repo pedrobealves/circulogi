@@ -39,31 +39,36 @@ export function useComponentFactory() {
   }
 
   // Função que cria um componente lógico padrão (AND, OR, etc.)
-  function createDefaultComponent(type: NodeType): {
+  function createDefaultComponent(
+    type: NodeType,
+    inputCount: number = 2
+  ): {
     mainNode: Node;
     nodes: Node[];
     edges: Edge[];
   } {
-    const mainNode: Node = createNode(type, NodeRole.COMPONENT, 32, 2, 1);
+    const mainNode = createNode(type, NodeRole.COMPONENT, 32, 2, 1); // O nó principal
 
-    const inNode1 = createNode(NodeType.IN, NodeRole.COMPONENT);
-    const inNode2 = createNode(NodeType.IN, NodeRole.COMPONENT);
-    const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
+    const inputNodes: Node[] = [];
+    for (let i = 0; i < inputCount; i++) {
+      inputNodes.push(createNode(NodeType.IN, NodeRole.COMPONENT));
+    }
+    const outputNode = createNode(NodeType.OUT, NodeRole.COMPONENT); // O nó de saída
 
-    const edges: Edge[] = [
-      createEdge(inNode1.id, mainNode.id),
-      createEdge(inNode2.id, mainNode.id),
-      createEdge(mainNode.id, outNode.id),
-    ];
+    // Criar as arestas para os nós de entrada e saída
+    const edges: Edge[] = inputNodes.map((inputNode) =>
+      createEdge(inputNode.id, mainNode.id)
+    );
+    edges.push(createEdge(mainNode.id, outputNode.id));
 
-    mainNode.inputs.push(inNode1.id, inNode2.id);
-    mainNode.outputs.push(outNode.id);
+    // Adicionar as referências de entrada e saída aos nós
+    mainNode.inputs.push(...inputNodes.map((node) => node.id));
+    mainNode.outputs.push(outputNode.id);
 
-    inNode1.outputs.push(mainNode.id);
-    inNode2.outputs.push(mainNode.id);
-    outNode.inputs.push(mainNode.id);
+    inputNodes.forEach((inputNode) => inputNode.outputs.push(mainNode.id));
+    outputNode.inputs.push(mainNode.id);
 
-    return { mainNode, nodes: [inNode1, inNode2, outNode], edges };
+    return { mainNode, nodes: [...inputNodes, outputNode], edges };
   }
 
   function createInputNode(): {
