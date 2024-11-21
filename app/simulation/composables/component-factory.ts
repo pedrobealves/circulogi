@@ -26,6 +26,7 @@ export function useComponentFactory() {
       [NodeType.NAND]: () => createDefaultComponent(NodeType.NAND),
       [NodeType.NOR]: () => createDefaultComponent(NodeType.NOR),
       [NodeType.XNOR]: () => createDefaultComponent(NodeType.XNOR),
+      [NodeType.NOT]: () => createNotComponent(),
       [NodeType.IN]: () => createInputNode(),
       [NodeType.OUT]: () => createOutputNode(),
     };
@@ -105,36 +106,38 @@ export function useComponentFactory() {
     return { mainNode, nodes: [outNode], edges };
   }
 
-  // Função para criar o componente NOT (com apenas uma entrada e uma saída)
-  // function createNotComponent(): {
-  //   mainNode: Node;
-  //   nodes: Node[];
-  //   edges: Edge[];
-  // } {
-  //   const componentId = nanoid();
-  //   const mainNode: Node = {
-  //     id: componentId,
-  //     name: "NOT",
-  //     type: NodeType.NOT,
-  //     inputs: [],
-  //     outputs: [],
-  //     value: null,
-  //     delay: 100,
-  //   };
+  //Função para criar o componente NOT (com apenas uma entrada e uma saída)
+  function createNotComponent(): {
+    mainNode: Node;
+    nodes: Node[];
+    edges: Edge[];
+  } {
+    console.log("createNotComponent");
 
-  //   const inNode = createInputNode();
-  //   const outNode = createOutputNode();
+    const mainNode: Node = createNode(
+      NodeType.NOT,
+      NodeRole.COMPONENT,
+      32,
+      1,
+      1
+    );
 
-  //   const edges: Edge[] = [
-  //     { id: nanoid(), source: inNode.id, target: mainNode.id },
-  //     { id: nanoid(), source: mainNode.id, target: outNode.id },
-  //   ];
+    const inNode = createNode(NodeType.IN, NodeRole.COMPONENT);
+    const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
 
-  //   mainNode.inputs.push(inNode.id);
-  //   mainNode.outputs.push(outNode.id);
+    const edges: Edge[] = [
+      createEdge(inNode.id, mainNode.id),
+      createEdge(mainNode.id, outNode.id),
+    ];
 
-  //   return { mainNode, nodes: [inNode, outNode], edges };
-  // }
+    inNode.outputs.push(mainNode.id);
+    outNode.inputs.push(mainNode.id);
+
+    mainNode.inputs.push(inNode.id);
+    mainNode.outputs.push(outNode.id);
+
+    return { mainNode, nodes: [inNode, outNode], edges };
+  }
 
   return { createComponent };
 }
