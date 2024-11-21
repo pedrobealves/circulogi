@@ -6,9 +6,6 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  experimental: {
-    renderJsonPayloads: false,
-  },
 
   extends: ["app/auth", "app/simulation", "app/website", "app/common"],
   modules: ["@pinia/nuxt", "nuxt-workers", "@nuxtjs/tailwindcss"],
