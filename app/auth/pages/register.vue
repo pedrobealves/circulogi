@@ -14,34 +14,22 @@ const { auth } = useSupabaseClient();
 const isLoading = ref(false);
 
 function onSubmit(event: { [x: string]: any }) {
-  const values = event as { email: string; password: string };
+  const values = event as { email: any; password: any };
   isLoading.value = true;
-
   auth
-    .signInWithPassword({
+    .signUp({
       email: values.email,
       password: values.password,
     })
-    .then((result) => {
-      if (result.error) {
-        // Tratando erros vindos da resposta
-        throw new Error(result.error.message);
-      }
-
-      // Login bem-sucedido
+    .then(() => {
       toast({
         title: "Success",
-        description: "Login successful! Redirecting...",
+        description: "Please check your email to confirm your account.",
       });
-
-      // Redirecionar após login bem-sucedido
-      navigateTo("/dashboard");
     })
     .catch((error) => {
-      // Exibir o erro no toast
       toast({
         title: "Error",
-        variant: "destructive",
         description: error.message,
       });
     })
@@ -67,7 +55,7 @@ definePageMeta({ middleware: "auth" });
   <AuthLayout>
     <template v-slot:link>
       <a
-        href="/register"
+        href="/login"
         :class="
           cn(
             buttonVariants({ variant: 'ghost' }),
@@ -75,15 +63,17 @@ definePageMeta({ middleware: "auth" });
           )
         "
       >
-        Register
+        Login
       </a>
     </template>
     <template v-slot:forms>
       <div class="flex flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
         <div class="flex flex-col space-y-2 text-center">
-          <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
+          <h1 class="text-2xl font-semibold tracking-tight">
+            Create an account
+          </h1>
           <p class="text-sm text-muted-foreground">
-            Enter your email below to login to your account
+            Enter your email below to create your account
           </p>
         </div>
         <AuthForm
@@ -100,7 +90,7 @@ definePageMeta({ middleware: "auth" });
             },
           }"
           :isLoading="isLoading"
-          submitButtonText="Login"
+          submitButtonText="Sign Up"
         />
         <SocialAuthButtons
           :isLoading="isLoading"

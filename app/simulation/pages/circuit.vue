@@ -57,43 +57,45 @@ const showType = computed(() => (nodeId: any) => {
 </script>
 
 <template>
-  <v-network-graph
-    class="graph"
-    v-model:layouts="circuitStore.layout"
-    :nodes="circuitStore.nodes"
-    :edges="circuitStore.edges"
-    :configs="configs"
-    :event-handlers="eventHandlers"
-  >
-    <template #override-node="{ nodeId, scale, config, ...slotProps }">
-      <circle
-        :r="getRadius(config.radius, nodeId)"
-        :fill="getFillColor(nodeId)"
-        v-bind="slotProps"
-      />
-      <!-- Use v-html to interpret escape sequences for icon characters. -->
-      <text
-        font-family="Inter"
-        :font-size="21 * scale"
-        fill="#000"
-        text-anchor="middle"
-        dominant-baseline="central"
-        font-weight="600"
-        style="pointer-events: none"
-      >
-        {{ showType(nodeId) }}
-      </text>
-      <circle
-        :r="config.radius * scale"
-        fill="none"
-        :stroke="getStrokeColor(nodeId)"
-        :stroke-width="3"
-        v-bind="slotProps"
-      />
-    </template>
-  </v-network-graph>
-  <InteractiveContainer />
-  <ToolbarOptions />
+  <div class="board">
+    <v-network-graph
+      class="graph"
+      v-model:layouts="circuitStore.layout"
+      :nodes="circuitStore.nodes"
+      :edges="circuitStore.edges"
+      :configs="configs"
+      :event-handlers="eventHandlers"
+    >
+      <template #override-node="{ nodeId, scale, config, ...slotProps }">
+        <circle
+          :r="getRadius(config.radius, nodeId)"
+          :fill="getFillColor(nodeId)"
+          v-bind="slotProps"
+        />
+        <!-- Use v-html to interpret escape sequences for icon characters. -->
+        <text
+          font-family="Inter"
+          :font-size="21 * scale"
+          fill="#000"
+          text-anchor="middle"
+          dominant-baseline="central"
+          font-weight="600"
+          style="pointer-events: none"
+        >
+          {{ showType(nodeId) }}
+        </text>
+        <circle
+          :r="config.radius * scale"
+          fill="none"
+          :stroke="getStrokeColor(nodeId)"
+          :stroke-width="3"
+          v-bind="slotProps"
+        />
+      </template>
+    </v-network-graph>
+    <InteractiveContainer />
+    <ToolbarOptions />
+  </div>
 </template>
 
 <style>
@@ -103,9 +105,7 @@ const showType = computed(() => (nodeId: any) => {
   width: 100dvw;
 }
 
-html,
-body,
-#__nuxt {
+.board {
   background-color: #f3f3f3;
   height: 100dvh;
   width: 100dvw;

@@ -7,8 +7,20 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   extends: ["app/auth", "app/simulation", "app/website", "app/common"],
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: [
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/supabase",
+    "unplugin-icons/nuxt",
+  ],
   pinia: {
     storesDirs: ["./stores/**"],
+  },
+  supabase: {
+    redirectOptions: {
+      login: "/login",
+      callback: "/app",
+      exclude: ["/", "/register", "/circuit"],
+    },
   },
 });

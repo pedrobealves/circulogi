@@ -1,6 +1,11 @@
+<script setup lang="ts">
+import Toaster from "@/common/components/ui/toast/Toaster.vue";
+</script>
+
 <template>
   <div>
     <NuxtPage />
+    <Toaster />
   </div>
 </template>
 
