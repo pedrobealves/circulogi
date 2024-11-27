@@ -1,0 +1,18 @@
+{
+  "register": {
+    "name": "Register",
+    "title": "Create an account",
+    "description": "Enter your email below to create your account"
+  },
+  "login": {
+    "name": "Login",
+    "title": "Login",
+    "description": "Enter your email below to login to your account"
+  },
+  "email": "Email",
+  "password": "Password",
+  "agreementText": "By clicking continue, you agree to our {termsOfService} and {privacyPolicy}.",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
+  "continue": "Or continue with"
+}

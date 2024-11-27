@@ -6,9 +6,36 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  extends: ["app/auth", "app/simulation", "app/website", "app/common"],
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  extends: [
+    "app/auth",
+    "app/simulation",
+    "app/website",
+    "app/common",
+    "app/circuit",
+  ],
+  modules: [
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/supabase",
+    "unplugin-icons/nuxt",
+  ],
   pinia: {
     storesDirs: ["./stores/**"],
+  },
+  supabase: {
+    redirectOptions: {
+      login: "/login",
+      callback: "/app",
+      exclude: ["/", "/register", "/circuit"],
+    },
+  },
+  i18n: {
+    lazy: false,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root", // recommended
+    },
+    strategy: "no_prefix",
   },
 });
