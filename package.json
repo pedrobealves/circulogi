@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@nuxtjs/color-mode": "^3.5.2",
+    "@nuxtjs/i18n": "^9.0.0-rc.2",
     "@nuxtjs/supabase": "^1.4.3",
     "@nuxtjs/tailwindcss": "^6.12.2",
     "@pinia/nuxt": "^0.7.0",
@@ -20,7 +21,7 @@
     "clsx": "^2.1.1",
     "d3-force": "^3.0.0",
     "gsap": "^3.12.5",
-    "lucide-vue-next": "^0.460.0",
+    "lucide-vue-next": "^0.461.0",
     "nanoid": "^5.0.8",
     "nuxt": "^3.14.1592",
     "radix-vue": "^1.9.10",

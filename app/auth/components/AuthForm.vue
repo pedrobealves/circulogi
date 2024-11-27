@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { AutoForm } from "@/common/components/ui/auto-form";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import LucideSpinner from "~icons/lucide/loader-2";

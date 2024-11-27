@@ -6,7 +6,13 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
-  extends: ["app/auth", "app/simulation", "app/website", "app/common"],
+  extends: [
+    "app/auth",
+    "app/simulation",
+    "app/website",
+    "app/common",
+    "app/circuit",
+  ],
   modules: [
     "@pinia/nuxt",
     "@nuxtjs/tailwindcss",
@@ -22,5 +28,14 @@ export default defineNuxtConfig({
       callback: "/app",
       exclude: ["/", "/register", "/circuit"],
     },
+  },
+  i18n: {
+    lazy: false,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root", // recommended
+    },
+    strategy: "no_prefix",
   },
 });

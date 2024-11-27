@@ -75,15 +75,17 @@ definePageMeta({ middleware: "auth" });
           )
         "
       >
-        Register
+        {{ $t("register.name") }}
       </a>
     </template>
     <template v-slot:forms>
       <div class="flex flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
         <div class="flex flex-col space-y-2 text-center">
-          <h1 class="text-2xl font-semibold tracking-tight">Login</h1>
+          <h1 class="text-2xl font-semibold tracking-tight">
+            {{ $t("login.title") }}
+          </h1>
           <p class="text-sm text-muted-foreground">
-            Enter your email below to login to your account
+            {{ $t("login.description") }}
           </p>
         </div>
         <AuthForm
@@ -91,16 +93,16 @@ definePageMeta({ middleware: "auth" });
           :onSubmit="onSubmit"
           :field-config="{
             email: {
-              label: 'Email',
-              inputProps: { type: 'email', placeholder: 'Email' },
+              label: $t('email'),
+              inputProps: { type: 'email', placeholder: $t('email') },
             },
             password: {
-              label: 'Password',
-              inputProps: { type: 'password', placeholder: 'Password' },
+              label: $t('password'),
+              inputProps: { type: 'password', placeholder: $t('password') },
             },
           }"
           :isLoading="isLoading"
-          submitButtonText="Login"
+          :submitButtonText="$t('login.name')"
         />
         <SocialAuthButtons
           :isLoading="isLoading"

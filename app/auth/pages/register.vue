@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { registerSchema } from "@/auth/schemas/register";
-import { toast } from "@/common/components/ui/toast";
 import { buttonVariants } from "@/common/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/common/lib/utils";
 
-import AuthForm from "@/auth/components/AuthForm.vue";
-import SocialAuthButtons from "@/auth/components/SocialAuthButtons.vue";
-import TermsAndPrivacy from "@/auth/components/TermsAndPrivacy.vue";
 import AuthLayout from "@/auth/components/AuthHero.vue";
 
 const { auth } = useSupabaseClient();
@@ -63,17 +59,17 @@ definePageMeta({ middleware: "auth" });
           )
         "
       >
-        Login
+        {{ $t("login.name") }}
       </a>
     </template>
     <template v-slot:forms>
       <div class="flex flex-col justify-center space-y-6 sm:w-[350px] mx-auto">
         <div class="flex flex-col space-y-2 text-center">
           <h1 class="text-2xl font-semibold tracking-tight">
-            Create an account
+            {{ $t("register.title") }}
           </h1>
           <p class="text-sm text-muted-foreground">
-            Enter your email below to create your account
+            {{ $t("register.description") }}
           </p>
         </div>
         <AuthForm
@@ -81,16 +77,16 @@ definePageMeta({ middleware: "auth" });
           :onSubmit="onSubmit"
           :field-config="{
             email: {
-              label: 'Email',
-              inputProps: { type: 'email', placeholder: 'Email' },
+              label: $t('email'),
+              inputProps: { type: 'email', placeholder: $t('email') },
             },
             password: {
-              label: 'Password',
-              inputProps: { type: 'password', placeholder: 'Password' },
+              label: $t('password'),
+              inputProps: { type: 'password', placeholder: $t('password') },
             },
           }"
           :isLoading="isLoading"
-          submitButtonText="Sign Up"
+          :submitButtonText="$t('register.name')"
         />
         <SocialAuthButtons
           :isLoading="isLoading"

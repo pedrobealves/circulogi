@@ -1,0 +1,18 @@
+{
+  "register": {
+    "name": "Registrar-se",
+    "title": "Criar uma conta",
+    "description": "Digite seu e-mail abaixo para criar sua conta"
+  },
+  "login": {
+    "name": "Entrar",
+    "title": "Entrar",
+    "description": "Digite seu e-mail abaixo para acessar sua conta"
+  },
+  "email": "E-mail",
+  "password": "Senha",
+  "agreementText": "Ao clicar em continuar, você concorda com nossos {termsOfService} e {privacyPolicy}.",
+  "termsOfService": "Termos de Serviço",
+  "privacyPolicy": "Política de Privacidade",
+  "continue": "Ou continue com"
+}

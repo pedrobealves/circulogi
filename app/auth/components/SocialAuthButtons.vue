@@ -26,7 +26,7 @@ const props = defineProps({
     </div>
     <div class="relative flex justify-center text-xs uppercase">
       <span class="bg-background px-2 text-muted-foreground">
-        Or continue with
+        {{ $t("continue") }}
       </span>
     </div>
   </div>
