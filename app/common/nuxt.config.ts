@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
   // https://nuxt.com/docs/api/configuration/nuxt-config
-  modules: ["shadcn-nuxt"],
+  modules: ["shadcn-nuxt", "unplugin-icons/nuxt"],
   shadcn: {
     /**
      * Prefix for all the imported component

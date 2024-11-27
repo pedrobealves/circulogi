@@ -13,22 +13,7 @@ export default defineNuxtConfig({
     "app/common",
     "app/circuit",
   ],
-  modules: [
-    "@pinia/nuxt",
-    "@nuxtjs/tailwindcss",
-    "@nuxtjs/supabase",
-    "unplugin-icons/nuxt",
-  ],
-  pinia: {
-    storesDirs: ["./stores/**"],
-  },
-  supabase: {
-    redirectOptions: {
-      login: "/login",
-      callback: "/app",
-      exclude: ["/", "/register", "/circuit"],
-    },
-  },
+  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
   i18n: {
     lazy: false,
     detectBrowserLanguage: {
