@@ -17,7 +17,6 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "@pinia/nuxt",
     "@nuxtjs/tailwindcss",
-    "@prisma/nuxt",
     "unplugin-icons/nuxt",
   ],
   i18n: {
@@ -28,8 +27,5 @@ export default defineNuxtConfig({
       redirectOn: "root", // recommended
     },
     strategy: "no_prefix",
-  },
-  prisma: {
-    generateClient: false,
   },
 });
