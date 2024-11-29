@@ -13,7 +13,13 @@ export default defineNuxtConfig({
     "app/common",
     "app/circuit",
   ],
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: [
+    "@nuxtjs/supabase",
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@prisma/nuxt",
+    "unplugin-icons/nuxt",
+  ],
   i18n: {
     lazy: false,
     detectBrowserLanguage: {
@@ -22,5 +28,8 @@ export default defineNuxtConfig({
       redirectOn: "root", // recommended
     },
     strategy: "no_prefix",
+  },
+  prisma: {
+    generateClient: false,
   },
 });
