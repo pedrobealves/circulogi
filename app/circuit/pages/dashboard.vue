@@ -205,10 +205,26 @@ const data = {
   ],
 };
 
+const user = useSupabaseUser();
+
 const activeTeam = ref(data.teams[0]);
 
 function setActiveTeam(team: (typeof data.teams)[number]) {
   activeTeam.value = team;
+}
+
+async function createNewCircuit() {
+  const userID = user.value?.id;
+  if (!userID) return;
+  await useFetch("/api/v1/circuits", {
+    method: "POST",
+    body: {
+      name: "New Circuit",
+      version: "1.0.0",
+      content: {},
+      userId: userID,
+    },
+  });
 }
 </script>
 
@@ -449,9 +465,9 @@ function setActiveTeam(team: (typeof data.teams)[number]) {
     </Sidebar>
     <SidebarInset>
       <header
-        class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        class="flex px-8 h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       >
-        <div class="flex items-center gap-2 px-4">
+        <div class="flex items-center gap-2 px-4 w-full">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
@@ -467,9 +483,12 @@ function setActiveTeam(team: (typeof data.teams)[number]) {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <div class="ml-auto">
+            <Button @click="createNewCircuit()">+ Criar Circuito</Button>
+          </div>
         </div>
       </header>
-      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
           <div class="aspect-video rounded-xl bg-muted/50" />
           <div class="aspect-video rounded-xl bg-muted/50" />

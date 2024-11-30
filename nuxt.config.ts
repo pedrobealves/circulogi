@@ -13,7 +13,12 @@ export default defineNuxtConfig({
     "app/common",
     "app/circuit",
   ],
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss"],
+  modules: [
+    "unplugin-icons/nuxt",
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@nuxtjs/supabase",
+  ],
   i18n: {
     lazy: false,
     detectBrowserLanguage: {
