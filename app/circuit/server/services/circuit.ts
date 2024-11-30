@@ -1,12 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import type { Circuit } from "../types/circuit";
 
-const prisma = new PrismaClient();
+const config = useRuntimeConfig();
+const client = new PrismaClient({
+  datasources: {
+    db: {
+      url: config.bdUrl as string,
+    },
+  },
+});
 
 export const create = async (
   circuit: Circuit
 ): Promise<Circuit | undefined> => {
-  const circuitCreated = await prisma.circuit.create({
+  const circuitCreated = await client.circuit.create({
     data: circuit,
   });
 
