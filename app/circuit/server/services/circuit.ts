@@ -5,7 +5,7 @@ const config = useRuntimeConfig();
 const client = new PrismaClient({
   datasources: {
     db: {
-      url: config.bdUrl as string,
+      url: config.bdDirectUrl as string,
     },
   },
 });
