@@ -10,6 +10,8 @@ export const create = async (
     data: circuit,
   });
 
+  console.log("Circuit created", circuitCreated);
+
   if (circuitCreated) {
     return circuitCreated;
   }

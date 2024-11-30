@@ -5,7 +5,11 @@ import type { Circuit } from "@prisma/client";
 export const create = async (event: H3Event): Promise<Circuit | string> => {
   const body = await readBody<Circuit>(event);
 
+  console.log("Creating circuit", body);
+
   const newCircuit = await circuitService.create(body);
+
+  console.log("Created circuit", newCircuit);
 
   if (!newCircuit) {
     setResponseStatus(event, 500);
