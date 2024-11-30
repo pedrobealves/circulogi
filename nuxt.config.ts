@@ -14,10 +14,10 @@ export default defineNuxtConfig({
     "app/circuit",
   ],
   modules: [
-    "@nuxtjs/supabase",
+    "unplugin-icons/nuxt",
     "@pinia/nuxt",
     "@nuxtjs/tailwindcss",
-    "unplugin-icons/nuxt",
+    "@nuxtjs/supabase",
   ],
   i18n: {
     lazy: false,
