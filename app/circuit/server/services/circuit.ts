@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import type { Circuit } from "../types/circuit";
+import type { NewCircuit, Circuit } from "../types/circuit";
 
 const config = useRuntimeConfig();
 const client = new PrismaClient({
@@ -11,17 +11,23 @@ const client = new PrismaClient({
 });
 
 export const create = async (
-  circuit: Circuit
+  circuit: NewCircuit,
+  userId: string
 ): Promise<Circuit | undefined> => {
   const circuitCreated = await client.circuit.create({
-    data: circuit,
+    data: { ...circuit, userId: userId },
   });
-
-  console.log("Circuit created", circuitCreated);
 
   if (circuitCreated) {
     return circuitCreated;
   }
 
   return undefined;
+};
+
+export const getAll = async (userId: string): Promise<Circuit[]> => {
+  return await client.circuit.findMany({
+    where: { userId: userId },
+    orderBy: { createdAt: "desc" },
+  });
 };
