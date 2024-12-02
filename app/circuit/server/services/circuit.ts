@@ -1,23 +1,22 @@
 import { PrismaClient } from "@prisma/client";
-import type { Circuit } from "../types/circuit";
+import type { NewCircuit, Circuit } from "../types/circuit";
 
 const config = useRuntimeConfig();
 const client = new PrismaClient({
   datasources: {
     db: {
-      url: config.bdDirectUrl as string,
+      url: config.bdUrl as string,
     },
   },
 });
 
 export const create = async (
-  circuit: Circuit
+  circuit: NewCircuit,
+  userId: string
 ): Promise<Circuit | undefined> => {
   const circuitCreated = await client.circuit.create({
-    data: circuit,
+    data: { ...circuit, userId: userId },
   });
-
-  console.log("Circuit created", circuitCreated);
 
   if (circuitCreated) {
     return circuitCreated;

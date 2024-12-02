@@ -1,15 +1,18 @@
 import { H3Event } from "h3";
 import * as circuitService from "../services/circuit";
-import type { Circuit } from "@prisma/client";
+import type { Circuit } from "../types/circuit";
+import { newCircuitSchema } from "../types/circuit";
+import { serverSupabaseUser } from "#supabase/server";
+import authMiddleware from "../utils/auth";
 
 export const create = async (event: H3Event): Promise<Circuit | string> => {
-  const body = await readBody<Circuit>(event);
+  await authMiddleware(event);
 
-  console.log("Creating circuit", body);
+  const body = await readValidatedBody(event, newCircuitSchema.parse);
 
-  const newCircuit = await circuitService.create(body);
+  const user = event.context.user;
 
-  console.log("Created circuit", newCircuit);
+  const newCircuit = await circuitService.create(body, user.id);
 
   if (!newCircuit) {
     setResponseStatus(event, 500);

@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/common/components/ui/breadcrumb";
+import LucideSpinner from "~icons/lucide/loader-2";
 
 import {
   Collapsible,
@@ -72,9 +73,11 @@ import {
   Sparkles,
   SquareTerminal,
   Trash2,
+  EllipsisVertical,
 } from "lucide-vue-next";
 import { ref } from "vue";
 
+import generate from "project-name-generator";
 // This is sample data.
 const data = {
   user: {
@@ -213,19 +216,30 @@ function setActiveTeam(team: (typeof data.teams)[number]) {
   activeTeam.value = team;
 }
 
+function toTitleCaseAdvanced(input: string): string {
+  return input
+    .trim() // Remove espaços extras no início e no fim
+    .toLowerCase()
+    .split(/\s+/) // Divide por qualquer sequência de espaços
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 async function createNewCircuit() {
-  const userID = user.value?.id;
-  if (!userID) return;
+  isLoading.value = true;
+
   await useFetch("/api/v1/circuits", {
     method: "POST",
     body: {
-      name: "New Circuit",
+      name: toTitleCaseAdvanced(generate({ words: 3 }).spaced),
       version: "1.0.0",
-      content: {},
-      userId: userID,
     },
+  }).finally(() => {
+    isLoading.value = false;
   });
 }
+
+const isLoading = ref(false);
 </script>
 
 <template>
@@ -243,13 +257,13 @@ async function createNewCircuit() {
                   <div
                     class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
                   >
-                    <component :is="activeTeam.logo" class="size-4" />
+                    <component :is="activeTeam?.logo" class="size-4" />
                   </div>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{
-                      activeTeam.name
+                      activeTeam?.name
                     }}</span>
-                    <span class="truncate text-xs">{{ activeTeam.plan }}</span>
+                    <span class="truncate text-xs">{{ activeTeam?.plan }}</span>
                   </div>
                   <ChevronsUpDown class="ml-auto" />
                 </SidebarMenuButton>
@@ -484,17 +498,49 @@ async function createNewCircuit() {
             </BreadcrumbList>
           </Breadcrumb>
           <div class="ml-auto">
-            <Button @click="createNewCircuit()">+ Criar Circuito</Button>
+            <Button :disabled="isLoading" @click="createNewCircuit()">
+              <LucideSpinner
+                v-if="isLoading"
+                class="mr-2 h-4 w-4 animate-spin"
+              />
+              <span>+ Criar Circuito</span></Button
+            >
           </div>
         </div>
       </header>
       <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+        <div class="grid gap-4 md:grid-cols-5">
+          <div
+            class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
+          >
+            <div
+              class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
+            ></div>
+            <div class="flex flex-wrap w-full">
+              <div class="flex flex-col max-w-60 p-2 mt-1">
+                <h3
+                  class="overflow-hidden text-ellipsis whitespace-nowrap font-normal"
+                >
+                  New Circuit New Circuit New Circuit New Circuit New Circuit
+                  New Circuit New Circuit New Circuit
+                </h3>
+                <span class="text-gray-500 text-sm">4 days ago</span>
+              </div>
+              <div
+                class="flex invisible flex-wrap flex-1 max-w-full pb-1 justify-end content-end group-hover:visible"
+              >
+                <EllipsisVertical class="w-5 text-muted-foreground/50" />
+              </div>
+            </div>
+          </div>
+          <div class="aspect-video rounded-xl bg-muted/50" />
+          <div class="aspect-video rounded-xl bg-muted/50" />
+          <div class="aspect-video rounded-xl bg-muted/50" />
+          <div class="aspect-video rounded-xl bg-muted/50" />
           <div class="aspect-video rounded-xl bg-muted/50" />
           <div class="aspect-video rounded-xl bg-muted/50" />
           <div class="aspect-video rounded-xl bg-muted/50" />
         </div>
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
       </div>
     </SidebarInset>
   </SidebarProvider>

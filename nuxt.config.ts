@@ -4,7 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     bdUrl: process.env.DATABASE_URL,
-    bdDirectUrl: process.env.DATABASE_DIRECT_URL,
   },
   future: {
     compatibilityVersion: 4,
