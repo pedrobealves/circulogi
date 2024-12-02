@@ -22,3 +22,23 @@ export const create = async (event: H3Event): Promise<Circuit | string> => {
   setResponseStatus(event, 200);
   return newCircuit;
 };
+
+// buscaTodos
+export const getAllCircuits = async (
+  event: H3Event
+): Promise<Circuit[] | string> => {
+  await authMiddleware(event);
+
+  const user = event.context.user;
+
+  const circuits = await circuitService.getAll(user.id);
+
+  if (!circuits.length) {
+    setResponseStatus(event, 404);
+    return "Não há circuitos cadastrados";
+  }
+
+  setResponseStatus(event, 200);
+
+  return circuits;
+};

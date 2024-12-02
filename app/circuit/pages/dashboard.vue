@@ -78,6 +78,7 @@ import {
 import { ref } from "vue";
 
 import generate from "project-name-generator";
+import type { Circuit } from "@prisma/client";
 // This is sample data.
 const data = {
   user: {
@@ -226,18 +227,38 @@ function toTitleCaseAdvanced(input: string): string {
 }
 
 async function createNewCircuit() {
-  isLoading.value = true;
+  isLoading.value = true; // Ativar estado de carregamento
 
-  await useFetch("/api/v1/circuits", {
-    method: "POST",
-    body: {
-      name: toTitleCaseAdvanced(generate({ words: 3 }).spaced),
-      version: "1.0.0",
-    },
-  }).finally(() => {
-    isLoading.value = false;
-  });
+  try {
+    // Executa a chamada manualmente com `$fetch`
+    const response = await $fetch("/api/v1/circuits", {
+      method: "POST",
+      body: {
+        name: toTitleCaseAdvanced(generate({ words: 3 }).spaced),
+        version: "1.0.0",
+      },
+    });
+
+    refresh();
+  } catch (error) {
+    // Lida com erros, se necessário
+    console.error("Erro ao criar circuito:", error);
+  } finally {
+    isLoading.value = false; // Desativar estado de carregamento
+  }
 }
+
+const {
+  data: circuitData,
+  status,
+  error,
+  refresh,
+  clear,
+} = useAsyncData("circuits", () =>
+  $fetch("/api/v1/circuits", {
+    headers: useRequestHeaders(["cookie"]),
+  })
+);
 
 const isLoading = ref(false);
 </script>
@@ -509,8 +530,10 @@ const isLoading = ref(false);
         </div>
       </header>
       <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
-        <div class="grid gap-4 md:grid-cols-5">
+        <div v-if="circuitData" class="grid gap-4 md:grid-cols-5">
           <div
+            v-for="circuit in circuitData"
+            :key="circuit.id"
             class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
           >
             <div
@@ -521,8 +544,7 @@ const isLoading = ref(false);
                 <h3
                   class="overflow-hidden text-ellipsis whitespace-nowrap font-normal"
                 >
-                  New Circuit New Circuit New Circuit New Circuit New Circuit
-                  New Circuit New Circuit New Circuit
+                  {{ circuit.name }}
                 </h3>
                 <span class="text-gray-500 text-sm">4 days ago</span>
               </div>
@@ -533,13 +555,6 @@ const isLoading = ref(false);
               </div>
             </div>
           </div>
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
         </div>
       </div>
     </SidebarInset>

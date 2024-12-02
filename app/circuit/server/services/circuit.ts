@@ -24,3 +24,10 @@ export const create = async (
 
   return undefined;
 };
+
+export const getAll = async (userId: string): Promise<Circuit[]> => {
+  return await client.circuit.findMany({
+    where: { userId: userId },
+    orderBy: { createdAt: "desc" },
+  });
+};
