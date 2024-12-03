@@ -18,5 +18,14 @@ export const newCircuitSchema = circuitSchema.omit({
   updatedAt: true,
 });
 
+const updateCircuitSchema = circuitSchema
+  .omit({
+    id: true,
+    userId: true,
+    createdAt: true,
+    updatedAt: true,
+  })
+  .partial();
+
 export type { Circuit } from "@prisma/client";
 export type NewCircuit = z.infer<typeof newCircuitSchema>;

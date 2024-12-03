@@ -3,8 +3,8 @@ import { useCircuitStore } from "@/simulation/stores/circuit";
 import { NodeType } from "~/simulation/types/nodeType";
 import { useNetworkGraph } from "~/simulation/composables/network-graph";
 import { useNodeEventHandlers } from "~/simulation/composables/node-event-handlers";
-import { NodeRole } from "../types/nodeRole";
-import ToolbarOptions from "../components/ToolbarOptions.vue";
+import { NodeRole } from "../../types/nodeRole";
+import ToolbarOptions from "../../components/ToolbarOptions.vue";
 
 const circuitStore = useCircuitStore();
 
