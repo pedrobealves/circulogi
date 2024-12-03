@@ -531,10 +531,11 @@ const isLoading = ref(false);
       </header>
       <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
         <div v-if="circuitData" class="grid gap-4 md:grid-cols-5">
-          <div
+          <NuxtLink
             v-for="circuit in circuitData"
             :key="circuit.id"
             class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
+            :to="{ name: 'circuit-id', params: { id: circuit.id } }"
           >
             <div
               class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
@@ -554,7 +555,7 @@ const isLoading = ref(false);
                 <EllipsisVertical class="w-5 text-muted-foreground/50" />
               </div>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </div>
     </SidebarInset>
