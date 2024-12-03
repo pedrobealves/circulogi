@@ -7,6 +7,15 @@ export const useNodesStore = defineStore("nodes", () => {
     nodes: {} as Record<string, { type: string; x?: number; y?: number }>,
   });
 
+  function setNodes(newNodes: any) {
+    const updatedNodes = newNodes.reduce((acc: any, node: any) => {
+      acc[node.id] = node; // Chave será o id do node
+      return acc;
+    }, {} as Record<string, Node>);
+
+    Object.assign(nodes, updatedNodes);
+  }
+
   function addNode(node: Node) {
     nodes[node.id] = node;
 
@@ -30,5 +39,6 @@ export const useNodesStore = defineStore("nodes", () => {
     removeNode,
     nodeCount,
     layouts,
+    setNodes,
   };
 });

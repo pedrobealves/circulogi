@@ -54,6 +54,13 @@ const showType = computed(() => (nodeId: any) => {
 
   return circuitStore.isComponent(node) ? node.type : "";
 });
+
+const route = useRoute();
+const id = route.params.id as string;
+
+onMounted(() => {
+  circuitStore.fetchCircuit(id);
+});
 </script>
 
 <template>

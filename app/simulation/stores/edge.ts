@@ -7,6 +7,18 @@ export const useEdgesStore = defineStore("edges", () => {
     edges[edge.id] = edge;
   }
 
+  function setEdges(newEdges: any) {
+    const updatedEdges = newEdges.reduce(
+      (acc: Record<string, any>, edge: any) => {
+        acc[edge.id] = edge;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
+    Object.assign(edges, updatedEdges);
+  }
+
   function removeEdgeById(edgeId: string) {
     delete edges[edgeId];
   }
@@ -39,5 +51,6 @@ export const useEdgesStore = defineStore("edges", () => {
     addEdge,
     removeEdge,
     removeEdgeById,
+    setEdges,
   };
 });

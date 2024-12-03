@@ -42,7 +42,6 @@ export const update = async (
   circuit: Circuit,
   id: string
 ): Promise<boolean> => {
-  console.log(circuit);
   const circuitUpdated = await client.circuit.update({
     where: { id: id },
     data: {

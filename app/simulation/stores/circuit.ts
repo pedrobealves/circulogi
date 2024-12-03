@@ -5,24 +5,62 @@ import { useEdgeFactory } from "@/simulation/composables/edge-factory";
 import * as vNG from "v-network-graph";
 import type { Node } from "~/simulation/types/node";
 import { Actions } from "~/simulation/types/actions";
-
+import type { Circuit } from "~/simulation/types/circuit";
 import { useNodesStore } from "./node";
 import { useEdgesStore } from "./edge";
 
 import { useComponentFactory } from "~/simulation/composables/component-factory";
 
 export const useCircuitStore = defineStore("circuit", () => {
+  const circuit = ref<Circuit>();
+
   const nodesStore = useNodesStore();
   const edgesStore = useEdgesStore();
   const { createNode } = useNodeFactory();
   const { createEdge } = useEdgeFactory();
   const { createComponent } = useComponentFactory();
+  const autoSave = ref(false);
 
   const selectedAction = ref<Actions>();
   const counter = ref(0);
+  const layout = nodesStore.layouts;
 
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
   const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
+
+  const graphState = computed(() => ({
+    nodes: nodesStore.nodes,
+    edges: edgesStore.edges,
+  }));
+
+  watch(
+    graphState,
+    () => {
+      if (autoSave.value) save();
+    },
+    { deep: true }
+  );
+
+  async function save() {
+    const nodes = Object.values(nodesStore.nodes);
+    const edges = Object.values(edgesStore.edges);
+    const layoutCircuit = layout;
+
+    const circuitUpdated = {
+      nodes,
+      edges,
+      layout: layoutCircuit,
+    };
+
+    if (circuit.value) {
+      await $fetch(`/api/v1/circuits/${circuit.value.id}`, {
+        method: "PUT",
+        body: {
+          content: JSON.stringify(circuitUpdated),
+        },
+      });
+    }
+  }
 
   const setSelectedAction = (action: Actions) => {
     selectedAction.value = action;
@@ -49,6 +87,27 @@ export const useCircuitStore = defineStore("circuit", () => {
     [NodeType.OUT]: "",
     [NodeType.CONN]: "",
   };
+
+  const fetchCircuit = async (id: string) => {
+    try {
+      const response = await fetch(`/api/v1/circuits/${id}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar o circuito");
+      }
+      circuit.value = await response.json();
+      if (circuit.value?.content) loadCircuit(circuit.value?.content);
+      autoSave.value = true;
+    } catch (error) {
+      console.error("Erro ao buscar o circuito:", error);
+    }
+  };
+
+  function loadCircuit(content: any) {
+    const circuitContent = JSON.parse(content);
+    nodesStore.setNodes(circuitContent.nodes);
+    edgesStore.setEdges(circuitContent.edges);
+    layout.nodes = circuitContent.layout.nodes;
+  }
 
   function generateNodeLabel(inputs: string[], type: NodeType): string {
     if (inputs.length === 0) {
@@ -307,12 +366,14 @@ export const useCircuitStore = defineStore("circuit", () => {
   }
 
   return {
+    circuit,
+    fetchCircuit,
     createComponentAndAdd,
     nodes: nodesStore.nodes,
     getNode: nodesStore.getNode,
     edges: edgesStore.edges,
     addNode: nodesStore.addNode,
-    layout: nodesStore.layouts,
+    layout,
     connectionNodes,
     selectNode,
     selectedNodes,
