@@ -102,6 +102,7 @@ onMounted(() => {
     </v-network-graph>
     <InteractiveContainer />
     <ToolbarOptions />
+    <TopBar />
   </div>
 </template>
 

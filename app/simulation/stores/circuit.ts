@@ -368,6 +368,7 @@ export const useCircuitStore = defineStore("circuit", () => {
   return {
     circuit,
     fetchCircuit,
+    save,
     createComponentAndAdd,
     nodes: nodesStore.nodes,
     getNode: nodesStore.getNode,

@@ -38,6 +38,9 @@ export function useNodeSelect() {
       nodesOriginalColors.set(node.id, node.color);
       node.color = "#1D62C9";
     });
+
+    nodesOriginalColors.set(node.id, node.color);
+    node.color = "#1D62C9";
   }
 
   function nodesConnDeHighlight() {

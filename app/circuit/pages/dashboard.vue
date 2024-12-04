@@ -536,6 +536,7 @@ const isLoading = ref(false);
             :key="circuit.id"
             class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
             :to="{ name: 'circuit-id', params: { id: circuit.id } }"
+            target="_blank"
           >
             <div
               class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
