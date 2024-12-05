@@ -111,6 +111,14 @@ export const useCircuitStore = defineStore("circuit", () => {
     }
   }
 
+  async function deleteCircuit(CircuitId: string) {
+    if (CircuitId) {
+      await $fetch(`/api/v1/circuits/${CircuitId}`, {
+        method: "DELETE",
+      });
+    }
+  }
+
   function addClkNode(node: Node) {
     clkNodes.value.push(node);
     startClock();
@@ -469,5 +477,6 @@ export const useCircuitStore = defineStore("circuit", () => {
     createNoteNode,
     addClkNode,
     actClk,
+    deleteCircuit,
   };
 });

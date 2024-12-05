@@ -75,12 +75,33 @@ import {
   Trash2,
   EllipsisVertical,
 } from "lucide-vue-next";
+
+import {
+  ContextMenu,
+  ContextMenuCheckboxItem,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/common/components/ui/context-menu";
+
 import { ref } from "vue";
 
 import generate from "project-name-generator";
 import type { Circuit } from "@prisma/client";
+import { useCircuitStore } from "~/simulation/stores/circuit";
 
 const user = useSupabaseUser();
+const circuitStore = useCircuitStore();
+
+const circuitSelected = ref<Circuit | null>(null);
 
 function handleLogOut() {
   useSupabaseClient().auth.signOut();
@@ -185,158 +206,158 @@ watchEffect(() => {
 });
 
 const isLoading = ref(false);
+
+const isDialogOpen = ref(false);
+
+function openEdit() {
+  isDialogOpen.value = true;
+}
+
+function open(circuit: Circuit) {
+  circuitSelected.value = circuit;
+}
+
+async function deleteCircuit() {
+  if (circuitSelected?.value?.id) {
+    // Validação completa
+    await circuitStore.deleteCircuit(circuitSelected.value.id); // Aguarda a exclusão
+    circuitSelected.value = null; // Limpa o circuito selecionado (opcional)
+    await refresh(); // Garante que a atualização ocorra após a exclusão
+  }
+}
+
+function onSubmit(values: any) {
+  isDialogOpen.value = false;
+}
 </script>
 
 <template>
-  <SidebarProvider>
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger as-child>
-                <SidebarMenuButton
-                  size="lg"
-                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div
-                    class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
-                  >
-                    <component :is="activeTeam?.logo" class="size-4" />
-                  </div>
-                  <div class="grid flex-1 text-left text-sm leading-tight">
-                    <span class="truncate font-semibold">{{
-                      activeTeam?.name
-                    }}</span>
-                    <span class="truncate text-xs">{{ activeTeam?.plan }}</span>
-                  </div>
-                  <ChevronsUpDown class="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+  <ContextMenu>
+    <SidebarProvider>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
           <SidebarMenu>
-            <Collapsible
-              v-for="item in data.navMain"
-              :key="item.title"
-              as-child
-              :default-open="item.isActive"
-              class="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger as-child>
-                  <SidebarMenuButton :tooltip="item.title">
-                    <component :is="item.icon" />
-                    <span>{{ item.title }}</span>
-                    <ChevronRight
-                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-                    />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    <SidebarMenuSubItem
-                      v-for="subItem in item.items"
-                      :key="subItem.title"
-                    >
-                      <SidebarMenuSubButton as-child>
-                        <a :href="subItem.url">
-                          <span>{{ subItem.title }}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          </SidebarMenu>
-        </SidebarGroup>
-        <SidebarGroup class="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>Circuitos</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem v-for="item in data.projects" :key="item.name">
-              <SidebarMenuButton as-child>
-                <a :href="item.url">
-                  <component :is="item.icon" />
-                  <span>{{ item.name }}</span>
-                </a>
-              </SidebarMenuButton>
+            <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                  <SidebarMenuAction show-on-hover>
-                    <MoreHorizontal />
-                    <span class="sr-only">MAis</span>
-                  </SidebarMenuAction>
+                  <SidebarMenuButton
+                    size="lg"
+                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  >
+                    <div
+                      class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                    >
+                      <component :is="activeTeam?.logo" class="size-4" />
+                    </div>
+                    <div class="grid flex-1 text-left text-sm leading-tight">
+                      <span class="truncate font-semibold">{{
+                        activeTeam?.name
+                      }}</span>
+                      <span class="truncate text-xs">{{
+                        activeTeam?.plan
+                      }}</span>
+                    </div>
+                    <ChevronsUpDown class="ml-auto" />
+                  </SidebarMenuButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  class="w-48 rounded-lg"
-                  side="bottom"
-                  align="end"
-                >
-                  <DropdownMenuItem>
-                    <Folder class="text-muted-foreground" />
-                    <span>View Project</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Forward class="text-muted-foreground" />
-                    <span>Share Project</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Trash2 class="text-muted-foreground" />
-                    <span>Delete Project</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton class="text-sidebar-foreground/70">
-                <MoreHorizontal class="text-sidebar-foreground/70" />
-                <span>More</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger as-child>
-                <SidebarMenuButton
-                  size="lg"
-                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Avatar class="h-8 w-8 rounded-lg">
-                    <AvatarImage
-                      :src="data.user.avatar"
-                      :alt="data.user.name"
-                    />
-                    <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
-                  </Avatar>
-                  <div class="grid flex-1 text-left text-sm leading-tight">
-                    <span class="truncate font-semibold">{{
-                      data.user.name
-                    }}</span>
-                    <span class="truncate text-xs">{{ data.user.email }}</span>
-                  </div>
-                  <ChevronsUpDown class="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                :side-offset="4"
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+            <SidebarMenu>
+              <Collapsible
+                v-for="item in data.navMain"
+                :key="item.title"
+                as-child
+                :default-open="item.isActive"
+                class="group/collapsible"
               >
-                <DropdownMenuLabel class="p-0 font-normal">
-                  <div
-                    class="flex items-center gap-2 px-1 py-1.5 text-left text-sm"
+                <SidebarMenuItem>
+                  <CollapsibleTrigger as-child>
+                    <SidebarMenuButton :tooltip="item.title">
+                      <component :is="item.icon" />
+                      <span>{{ item.title }}</span>
+                      <ChevronRight
+                        class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                      />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem
+                        v-for="subItem in item.items"
+                        :key="subItem.title"
+                      >
+                        <SidebarMenuSubButton as-child>
+                          <a :href="subItem.url">
+                            <span>{{ subItem.title }}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroup>
+          <SidebarGroup class="group-data-[collapsible=icon]:hidden">
+            <SidebarGroupLabel>Circuitos</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem v-for="item in data.projects" :key="item.name">
+                <SidebarMenuButton as-child>
+                  <a :href="item.url">
+                    <component :is="item.icon" />
+                    <span>{{ item.name }}</span>
+                  </a>
+                </SidebarMenuButton>
+                <DropdownMenu>
+                  <DropdownMenuTrigger as-child>
+                    <SidebarMenuAction show-on-hover>
+                      <MoreHorizontal />
+                      <span class="sr-only">MAis</span>
+                    </SidebarMenuAction>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    class="w-48 rounded-lg"
+                    side="bottom"
+                    align="end"
+                  >
+                    <DropdownMenuItem>
+                      <Folder class="text-muted-foreground" />
+                      <span>View Project</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Forward class="text-muted-foreground" />
+                      <span>Share Project</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Trash2 class="text-muted-foreground" />
+                      <span>Delete Project</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton class="text-sidebar-foreground/70">
+                  <MoreHorizontal class="text-sidebar-foreground/70" />
+                  <span>More</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <SidebarMenuButton
+                    size="lg"
+                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <Avatar class="h-8 w-8 rounded-lg">
                       <AvatarImage
@@ -353,81 +374,125 @@ const isLoading = ref(false);
                         data.user.email
                       }}</span>
                     </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem @click="handleLogOut">
-                  <LogOut />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-    <SidebarInset>
-      <header
-        class="flex px-8 h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-      >
-        <div class="flex items-center gap-2 px-4 w-full">
-          <SidebarTrigger class="-ml-1" />
-          <Separator orientation="vertical" class="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
-                  Construa seu circuito
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator class="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Todos</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div class="ml-auto">
-            <Button :disabled="isLoading" @click="createNewCircuit()">
-              <LucideSpinner
-                v-if="isLoading"
-                class="mr-2 h-4 w-4 animate-spin"
-              />
-              <span>+ Criar Circuito</span></Button
-            >
-          </div>
-        </div>
-      </header>
-      <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
-        <div v-if="circuitData" class="grid gap-4 md:grid-cols-5">
-          <NuxtLink
-            v-for="circuit in circuitData"
-            :key="circuit.id"
-            class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
-            :to="{ name: 'circuit-id', params: { id: circuit.id } }"
-            target="_blank"
-          >
-            <div
-              class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
-            ></div>
-            <div class="flex flex-wrap w-full">
-              <div class="flex flex-col max-w-60 p-2 mt-1">
-                <h3
-                  class="overflow-hidden text-ellipsis whitespace-nowrap font-normal"
+                    <ChevronsUpDown class="ml-auto size-4" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  :side-offset="4"
                 >
-                  {{ circuit.name }}
-                </h3>
-                <span class="text-gray-500 text-sm">4 days ago</span>
-              </div>
-              <div
-                class="flex invisible flex-wrap flex-1 max-w-full pb-1 justify-end content-end group-hover:visible"
+                  <DropdownMenuLabel class="p-0 font-normal">
+                    <div
+                      class="flex items-center gap-2 px-1 py-1.5 text-left text-sm"
+                    >
+                      <Avatar class="h-8 w-8 rounded-lg">
+                        <AvatarImage
+                          :src="data.user.avatar"
+                          :alt="data.user.name"
+                        />
+                        <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
+                      </Avatar>
+                      <div class="grid flex-1 text-left text-sm leading-tight">
+                        <span class="truncate font-semibold">{{
+                          data.user.name
+                        }}</span>
+                        <span class="truncate text-xs">{{
+                          data.user.email
+                        }}</span>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem @click="handleLogOut">
+                    <LogOut />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <SidebarInset>
+        <header
+          class="flex px-8 h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+        >
+          <div class="flex items-center gap-2 px-4 w-full">
+            <SidebarTrigger class="-ml-1" />
+            <Separator orientation="vertical" class="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem class="hidden md:block">
+                  <BreadcrumbLink href="#">
+                    Construa seu circuito
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator class="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Todos</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <div class="ml-auto">
+              <Button :disabled="isLoading" @click="createNewCircuit()">
+                <LucideSpinner
+                  v-if="isLoading"
+                  class="mr-2 h-4 w-4 animate-spin"
+                />
+                <span>+ Criar Circuito</span></Button
               >
-                <EllipsisVertical class="w-5 text-muted-foreground/50" />
-              </div>
             </div>
-          </NuxtLink>
-        </div>
-      </div>
-    </SidebarInset>
-  </SidebarProvider>
+          </div>
+        </header>
+        <ContextMenuTrigger>
+          <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
+            <div v-if="circuitData" class="grid gap-4 md:grid-cols-5">
+              <NuxtLink
+                v-for="circuit in circuitData"
+                :key="circuit.id"
+                class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
+                :to="{ name: 'circuit-id', params: { id: circuit.id } }"
+                target="_blank"
+                @contextmenu="open(circuit)"
+              >
+                <div
+                  class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
+                ></div>
+                <div class="flex flex-wrap w-full">
+                  <div class="flex flex-col max-w-60 p-2 mt-1">
+                    <h3
+                      class="overflow-hidden text-ellipsis whitespace-nowrap font-normal"
+                    >
+                      {{ circuit.name }}
+                    </h3>
+                    <span class="text-gray-500 text-sm">4 days ago</span>
+                  </div>
+                  <div
+                    class="flex invisible flex-wrap flex-1 max-w-full pb-1 justify-end content-end group-hover:visible"
+                  >
+                    <EllipsisVertical
+                      class="w-5 rounded-md text-muted-foreground/50"
+                    />
+                  </div>
+                </div>
+              </NuxtLink>
+            </div>
+          </div>
+        </ContextMenuTrigger>
+      </SidebarInset>
+    </SidebarProvider>
+    <ContextMenuContent class="w-64">
+      <ContextMenuItem inset @click="openEdit()">
+        Remonear
+        <ContextMenuShortcut>⌘[</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem inset @click="deleteCircuit()">
+        Excluir
+        <ContextMenuShortcut>⌘]</ContextMenuShortcut>
+      </ContextMenuItem>
+    </ContextMenuContent>
+  </ContextMenu>
 </template>

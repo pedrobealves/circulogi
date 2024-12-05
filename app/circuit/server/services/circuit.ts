@@ -54,3 +54,11 @@ export const update = async (
 
   return !!circuitUpdated;
 };
+
+export const deleteCircuit = async (id: string): Promise<boolean> => {
+  const deletedCircuit = await client.circuit.delete({
+    where: { id: id },
+  });
+
+  return deletedCircuit !== null;
+};
