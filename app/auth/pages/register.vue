@@ -34,7 +34,7 @@ function onSubmit(event: { [x: string]: any }) {
     });
 }
 
-const redirectTo = `${useRuntimeConfig().public.baseUrl}/confirm`;
+const redirectTo = `${useRuntimeConfig().public.baseUrl}/dashboard`;
 
 function handleGitHubAuth() {
   auth.signInWithOAuth({ provider: "github", options: { redirectTo } });
