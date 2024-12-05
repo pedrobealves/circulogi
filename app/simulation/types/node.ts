@@ -16,5 +16,6 @@ export interface Node extends vNG.Node {
   maxInputs?: number; // Número máximo de entradas permitidas (ex.: AND: 2,
   maxOutputs?: number; // Número máximo de saídas permitidas (geralmente 1)
   value: number | null;
+  note?: string;
   delay?: number;
 }

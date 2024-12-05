@@ -21,6 +21,7 @@ const getFillColor = computed(() => (nodeId: any) => {
     [NodeType.CONN]: node.color,
     [NodeType.OUT]: node.color,
     [NodeType.IN]: node.role === NodeRole.INPUT ? node.color : "transparent",
+    [NodeType.CLK]: node.color,
   } as const;
 
   return color[node.type as keyof typeof color] || "transparent";
@@ -30,6 +31,8 @@ const getStrokeColor = computed(() => (nodeId: any) => {
   const node = circuitStore.getNode(nodeId);
 
   if (!node) return "black";
+
+  if (node.type === NodeType.NOTE) return "transparent";
 
   return circuitStore.isComponent(node) ? "black" : node.color;
 });
@@ -42,6 +45,7 @@ const getRadius = computed(() => (radius: number, nodeId: any) => {
   const value = {
     [NodeType.OUT]: radius,
     [NodeType.IN]: radius - 12,
+    [NodeType.CLK]: radius - 12,
   } as const;
 
   return value[node.type as keyof typeof value] || radius - 4;
@@ -51,6 +55,7 @@ const showType = computed(() => (nodeId: any) => {
   const node = circuitStore.getNode(nodeId);
 
   if (!node) return "";
+  if (node.type === NodeType.NOTE) return node.note;
 
   return circuitStore.isComponent(node) ? node.type : "";
 });
@@ -102,6 +107,7 @@ onMounted(() => {
     </v-network-graph>
     <InteractiveContainer />
     <ToolbarOptions />
+    <TopBar />
   </div>
 </template>
 

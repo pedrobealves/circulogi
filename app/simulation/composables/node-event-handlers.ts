@@ -26,7 +26,7 @@ export function useNodeEventHandlers() {
     } as T;
   }
 
-  const { executeAction } = useActionsNode();
+  const { executeAction, openNote } = useActionsNode();
 
   // Usa o throttle do Lodash para limitar a frequência do evento
   const throttledHandleNodeCollision = throttle((node) => {
@@ -36,7 +36,8 @@ export function useNodeEventHandlers() {
   const eventHandlers: vNG.EventHandlers = {
     "node:click": ({ node }) => {
       solve(node);
-      executeAction(node); // Processamento lógico para o nó clicado
+      executeAction(node);
+      //openNote(node); // Processamento lógico para o nó clicado
     },
     "node:pointerdown": ({ node }) => {
       selectNode(node); // Seleciona o nó

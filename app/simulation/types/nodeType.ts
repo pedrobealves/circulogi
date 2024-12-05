@@ -9,4 +9,10 @@ export enum NodeType {
   IN = "IN",
   OUT = "OUT",
   CONN = "CONN",
+  CLK = "CLK",
+  D = "D",
+  T = "T",
+  SR = "SR",
+  JK = "JK",
+  NOTE = "NOTE",
 }
