@@ -33,8 +33,8 @@ export const useCircuitStore = defineStore("circuit", () => {
     clkNodes.value.forEach((node) => {
       console.log("Toggling CLK node", node.id);
       console.log("CLK node value", node.value);
-      node.value = node.value === 1 ? 0 : 1;
-      node.color = node.value === 1 ? "#00AA11" : "#FF4D4D";
+      //node.value = node.value === 1 ? 0 : 1;
+      //node.color = node.value === 1 ? "#00AA11" : "#FF4D4D";
       console.log("CLK node value2", node.value);
       if (node) {
         const outputNodeId = node.outputs[0];
