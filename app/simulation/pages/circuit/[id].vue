@@ -32,6 +32,8 @@ const getStrokeColor = computed(() => (nodeId: any) => {
 
   if (!node) return "black";
 
+  if (node.type === NodeType.NOTE) return "transparent";
+
   return circuitStore.isComponent(node) ? "black" : node.color;
 });
 
@@ -53,6 +55,7 @@ const showType = computed(() => (nodeId: any) => {
   const node = circuitStore.getNode(nodeId);
 
   if (!node) return "";
+  if (node.type === NodeType.NOTE) return node.note;
 
   return circuitStore.isComponent(node) ? node.type : "";
 });

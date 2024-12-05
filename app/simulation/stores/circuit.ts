@@ -78,7 +78,8 @@ export const useCircuitStore = defineStore("circuit", () => {
       value !== NodeType.IN &&
       value !== NodeType.OUT &&
       value !== NodeType.CONN &&
-      value !== NodeType.CLK
+      value !== NodeType.CLK &&
+      value !== NodeType.NOTE
   );
 
   const selectedNodes = ref<Node>();
@@ -101,6 +102,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     [NodeType.OUT]: "",
     [NodeType.CONN]: "",
     [NodeType.CLK]: "",
+    [NodeType.NOTE]: "",
   };
 
   const fetchCircuit = async (id: string) => {
@@ -169,6 +171,19 @@ export const useCircuitStore = defineStore("circuit", () => {
       nodes.forEach((node) => nodesStore.addNode(node));
       edges.forEach((edge) => edgesStore.addEdge(edge));
     }
+  }
+
+  function createNoteNode(text: string) {
+    const component = useNodeFactory().createNode(
+      NodeType.NOTE,
+      NodeRole.COMPONENT,
+      32,
+      0,
+      0
+    );
+    component.note = text;
+    nodesStore.addNode(component);
+    save();
   }
 
   function selectNode(nodeId: string) {
@@ -404,5 +419,6 @@ export const useCircuitStore = defineStore("circuit", () => {
     deleteConnection,
     generateLabel,
     generateNodeLabel,
+    createNoteNode,
   };
 });

@@ -20,6 +20,20 @@ export function useActionsNode() {
     actions[option]?.(nodeId);
   }
 
+  function openNote(nodeId: string) {
+    const node = circuitStore.getNode(nodeId);
+
+    if (node?.type !== NodeType.NOTE) return;
+
+    console.log(node.value);
+
+    if (node.value) {
+      node.color = "transparent";
+    } else {
+      node.color = "black";
+    }
+  }
+
   function deleteNode(nodeId: string) {
     const node = circuitStore.getNode(nodeId);
 
@@ -44,5 +58,5 @@ export function useActionsNode() {
     console.log("Nó deletado com sucesso");
   }
 
-  return { executeAction };
+  return { executeAction, openNote };
 }

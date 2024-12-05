@@ -4,6 +4,18 @@ import gsap from "gsap";
 import { NodeType } from "@/simulation/types/nodeType";
 import { useCircuitStore } from "@/simulation/stores/circuit";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/common/components/ui/dialog";
+
+import { Textarea } from "@/common/components/ui/textarea";
+
 const circuitStore = useCircuitStore();
 
 // Dados iniciais
@@ -40,7 +52,7 @@ const details = [
     visible: false,
     items: logics,
   },
-  { visible: false, items: [] },
+  { visible: false, items: [{ title: "NOTE", img: "" }] },
 ];
 
 const container = ref(null);
@@ -119,8 +131,20 @@ const onMouseLeaveContainer = () => {
   });
 };
 
+const isDialogOpen = ref(false);
+
 function addNewComponent(type: string) {
+  if (type === "NOTE") {
+    isDialogOpen.value = true;
+    console.log(isDialogOpen.value);
+    return; // Evitar criar o componente diretamente
+  }
   circuitStore.createComponentAndAdd(type as NodeType);
+}
+
+function onSubmit(values: any) {
+  isDialogOpen.value = false;
+  circuitStore.createNoteNode(values.text);
 }
 </script>
 
@@ -189,4 +213,33 @@ function addNewComponent(type: string) {
       </div>
     </div>
   </div>
+  <Form v-slot="{ handleSubmit }">
+    <Dialog :open="isDialogOpen">
+      <DialogContent
+        class="sm:max-w-[425px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 max-h-[90dvh]"
+      >
+        <DialogHeader class="p-6 pb-0">
+          <DialogTitle>Nota</DialogTitle>
+          <DialogDescription> Escreva sua nota abaixo </DialogDescription>
+        </DialogHeader>
+        <div class="grid gap-4 py-4 overflow-y-auto px-6">
+          <div class="flex flex-col justify-between h-28">
+            <form id="dialogForm" @submit="handleSubmit($event, onSubmit)">
+              <FormField v-slot="{ componentField }" name="text">
+                <FormItem>
+                  <FormControl>
+                    <Textarea type="text" v-bind="componentField" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </FormField>
+            </form>
+          </div>
+        </div>
+        <DialogFooter class="p-6 pt-0">
+          <Button type="submit" form="dialogForm"> Salvar </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </Form>
 </template>
