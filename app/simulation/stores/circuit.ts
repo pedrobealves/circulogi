@@ -26,7 +26,12 @@ export const useCircuitStore = defineStore("circuit", () => {
   const layout = nodesStore.layouts;
 
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
-  const typeConditions = [NodeType.IN, NodeType.OUT, NodeType.CONN];
+  const typeConditions = [
+    NodeType.IN,
+    NodeType.OUT,
+    NodeType.CONN,
+    NodeType.CLK,
+  ];
 
   const graphState = computed(() => ({
     nodes: nodesStore.nodes,
@@ -44,11 +49,13 @@ export const useCircuitStore = defineStore("circuit", () => {
   async function save() {
     const nodes = Object.values(nodesStore.nodes);
     const edges = Object.values(edgesStore.edges);
+    const count = counter.value;
     const layoutCircuit = layout;
 
     const circuitUpdated = {
       nodes,
       edges,
+      count,
       layout: layoutCircuit,
     };
 
@@ -68,7 +75,10 @@ export const useCircuitStore = defineStore("circuit", () => {
 
   const logicTypes: NodeType[] = Object.values(NodeType).filter(
     (value) =>
-      value !== NodeType.IN && value !== NodeType.OUT && value !== NodeType.CONN
+      value !== NodeType.IN &&
+      value !== NodeType.OUT &&
+      value !== NodeType.CONN &&
+      value !== NodeType.CLK
   );
 
   const selectedNodes = ref<Node>();
@@ -84,8 +94,13 @@ export const useCircuitStore = defineStore("circuit", () => {
     [NodeType.XNOR]: "^",
     [NodeType.NOT]: "~", // Unário
     [NodeType.IN]: "",
+    [NodeType.D]: "",
+    [NodeType.JK]: "",
+    [NodeType.T]: "",
+    [NodeType.SR]: "",
     [NodeType.OUT]: "",
     [NodeType.CONN]: "",
+    [NodeType.CLK]: "",
   };
 
   const fetchCircuit = async (id: string) => {
@@ -107,6 +122,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     nodesStore.setNodes(circuitContent.nodes);
     edgesStore.setEdges(circuitContent.edges);
     layout.nodes = circuitContent.layout.nodes;
+    counter.value = circuitContent.count;
   }
 
   function generateNodeLabel(inputs: string[], type: NodeType): string {

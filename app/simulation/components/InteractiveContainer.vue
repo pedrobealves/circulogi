@@ -33,6 +33,7 @@ const details = [
     items: [
       { title: "IN", img: "" },
       { title: "OUT", img: "" },
+      { title: "CLK", img: "" },
     ],
   },
   {
@@ -61,7 +62,7 @@ const buttonClasses = computed(
 
 const containerDimensions = [
   { width: 500, height: 204 },
-  { width: 460, height: 290 },
+  { width: 460, height: 392 },
   { width: 480, height: 204 },
 ];
 
