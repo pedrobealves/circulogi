@@ -79,137 +79,54 @@ import { ref } from "vue";
 
 import generate from "project-name-generator";
 import type { Circuit } from "@prisma/client";
+
+const user = useSupabaseUser();
+
+function handleLogOut() {
+  useSupabaseClient().auth.signOut();
+  navigateTo("/login");
+}
+
 // This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: user.value?.user_metadata.full_name,
+    email: user.value?.email,
     avatar: "",
   },
   teams: [
     {
-      name: "Acme Inc",
+      name: "circulogi",
       logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
+      plan: "",
     },
   ],
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
+      title: "Documentação",
       url: "#",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
+          title: "Introdução",
           url: "#",
         },
       ],
     },
     {
-      title: "Settings",
+      title: "Configurações",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
+          title: "Geral",
           url: "#",
         },
       ],
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+  projects: [],
 };
-
-const user = useSupabaseUser();
 
 const activeTeam = ref(data.teams[0]);
 
@@ -238,8 +155,11 @@ async function createNewCircuit() {
         version: "1.0.0",
       },
     });
-
     refresh();
+
+    const route = useRoute();
+
+    navigateTo(`/circuit/${response.id}`);
   } catch (error) {
     // Lida com erros, se necessário
     console.error("Erro ao criar circuito:", error);
@@ -289,46 +209,13 @@ const isLoading = ref(false);
                   <ChevronsUpDown class="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                class="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                align="start"
-                side="bottom"
-                :side-offset="4"
-              >
-                <DropdownMenuLabel class="text-xs text-muted-foreground">
-                  Teams
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  v-for="(team, index) in data.teams"
-                  :key="team.name"
-                  class="gap-2 p-2"
-                  @click="setActiveTeam(team)"
-                >
-                  <div
-                    class="flex size-6 items-center justify-center rounded-sm border"
-                  >
-                    <component :is="team.logo" class="size-4 shrink-0" />
-                  </div>
-                  {{ team.name }}
-                  <DropdownMenuShortcut>⌘{{ index + 1 }}</DropdownMenuShortcut>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem class="gap-2 p-2">
-                  <div
-                    class="flex size-6 items-center justify-center rounded-md border bg-background"
-                  >
-                    <Plus class="size-4" />
-                  </div>
-                  <div class="font-medium text-muted-foreground">Add team</div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
           <SidebarMenu>
             <Collapsible
               v-for="item in data.navMain"
@@ -366,7 +253,7 @@ const isLoading = ref(false);
           </SidebarMenu>
         </SidebarGroup>
         <SidebarGroup class="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
+          <SidebarGroupLabel>Circuitos</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem v-for="item in data.projects" :key="item.name">
               <SidebarMenuButton as-child>
@@ -379,7 +266,7 @@ const isLoading = ref(false);
                 <DropdownMenuTrigger as-child>
                   <SidebarMenuAction show-on-hover>
                     <MoreHorizontal />
-                    <span class="sr-only">More</span>
+                    <span class="sr-only">MAis</span>
                   </SidebarMenuAction>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -465,29 +352,7 @@ const isLoading = ref(false);
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <Sparkles />
-                    Upgrade to Pro
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <BadgeCheck />
-                    Account
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <CreditCard />
-                    Billing
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Bell />
-                    Notifications
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem @click="handleLogOut">
                   <LogOut />
                   Log out
                 </DropdownMenuItem>
@@ -509,12 +374,12 @@ const isLoading = ref(false);
             <BreadcrumbList>
               <BreadcrumbItem class="hidden md:block">
                 <BreadcrumbLink href="#">
-                  Building Your Application
+                  Construa seu circuito
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+                <BreadcrumbPage>Todos</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>

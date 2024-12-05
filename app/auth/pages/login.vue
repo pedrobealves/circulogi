@@ -28,12 +28,6 @@ function onSubmit(event: { [x: string]: any }) {
         throw new Error(result.error.message);
       }
 
-      // Login bem-sucedido
-      toast({
-        title: "Success",
-        description: "Login successful! Redirecting...",
-      });
-
       // Redirecionar após login bem-sucedido
       navigateTo("/dashboard");
     })
