@@ -37,7 +37,6 @@ export function useNodeEventHandlers() {
     "node:click": ({ node }) => {
       solve(node);
       executeAction(node);
-      //openNote(node); // Processamento lógico para o nó clicado
     },
     "node:pointerdown": ({ node }) => {
       selectNode(node); // Seleciona o nó

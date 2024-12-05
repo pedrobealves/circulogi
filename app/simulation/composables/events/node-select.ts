@@ -58,6 +58,18 @@ export function useNodeSelect() {
   function updateLabels() {
     // Função para atualizar o label de um nó, seja AND, OR, NOT, etc.
     const updateNodeLabel = (node: any) => {
+      if (
+        node.label === "CLK" ||
+        node.label.slice(0, 2) === "S_" ||
+        node.label.slice(0, 2) === "R_" ||
+        node.label.slice(0, 2) === "J_" ||
+        node.label.slice(0, 2) === "K_"
+      )
+        return;
+
+      if (node.label.slice(0, 2) === "Q_" || node.label.slice(0, 4) === "~(Q_")
+        return;
+
       if (!node.inputs[0]) return;
 
       const mainNode = circuitStore.getNode(node.inputs[0]);
