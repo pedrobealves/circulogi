@@ -108,3 +108,36 @@ export const update = async (event: H3Event): Promise<string> => {
   setResponseStatus(event, 200);
   return "Circuito editado com sucesso";
 };
+
+export const deleteCircuit = async (event: H3Event): Promise<string> => {
+  await authMiddleware(event);
+
+  const circuitId = getRouterParam(event, "id") || "";
+
+  if (circuitId == "") {
+    throw createError({
+      status: 400,
+      message: "Id do circuito inválido",
+      data: {
+        message: "Circuito inválido",
+      },
+    });
+  }
+
+  const circuit = await circuitService.getById(circuitId);
+
+  if (!circuit) {
+    setResponseStatus(event, 404);
+    return "Circuito não encontrado";
+  }
+
+  const deleted = await circuitService.deleteCircuit(circuitId);
+
+  if (!deleted) {
+    setResponseStatus(event, 500);
+    return "Erro ao excluir circuito";
+  }
+
+  setResponseStatus(event, 200);
+  return "Circuito deletado com sucesso";
+};
