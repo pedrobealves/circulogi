@@ -157,8 +157,6 @@ async function createNewCircuit() {
     });
     refresh();
 
-    const route = useRoute();
-
     navigateTo(`/circuit/${response.id}`);
   } catch (error) {
     // Lida com erros, se necessário
@@ -179,6 +177,12 @@ const {
     headers: useRequestHeaders(["cookie"]),
   })
 );
+
+watchEffect(() => {
+  if (!user.value) {
+    return navigateTo("/login");
+  }
+});
 
 const isLoading = ref(false);
 </script>

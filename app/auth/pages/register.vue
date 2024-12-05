@@ -5,6 +5,7 @@ import { buttonVariants } from "@/common/components/ui/button";
 import { cn } from "@/common/lib/utils";
 
 import AuthLayout from "@/auth/components/AuthHero.vue";
+import { toast } from "~/common/components/ui/toast";
 
 const { auth } = useSupabaseClient();
 const isLoading = ref(false);
@@ -34,14 +35,34 @@ function onSubmit(event: { [x: string]: any }) {
     });
 }
 
-const redirectTo = `${useRuntimeConfig().public.baseUrl}/confirm`;
+const redirectTo = `${useRuntimeConfig().public.baseUrl}/dashboard`;
 
 function handleGitHubAuth() {
-  auth.signInWithOAuth({ provider: "github", options: { redirectTo } });
+  auth
+    .signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: "/dashboard" },
+    })
+    .then(() => {
+      navigateTo("/dashboard");
+    })
+    .catch((error) => {
+      console.error("Authentication failed:", error);
+    });
 }
 
 function handleGoogleAuth() {
-  auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+  auth
+    .signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: "/dashboard" },
+    })
+    .then(() => {
+      navigateTo("/dashboard");
+    })
+    .catch((error) => {
+      console.error("Authentication failed:", error);
+    });
 }
 
 definePageMeta({ middleware: "auth" });

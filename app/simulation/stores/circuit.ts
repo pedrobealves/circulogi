@@ -8,8 +8,10 @@ import { Actions } from "~/simulation/types/actions";
 import type { Circuit } from "~/simulation/types/circuit";
 import { useNodesStore } from "./node";
 import { useEdgesStore } from "./edge";
+import { useInterval } from "@/simulation/composables/clock";
 
 import { useComponentFactory } from "~/simulation/composables/component-factory";
+import { useLogicPropagation } from "../composables/events/logic-propagation";
 
 export const useCircuitStore = defineStore("circuit", () => {
   const circuit = ref<Circuit>();
@@ -24,6 +26,46 @@ export const useCircuitStore = defineStore("circuit", () => {
   const selectedAction = ref<Actions>();
   const counter = ref(0);
   const layout = nodesStore.layouts;
+  const clkNodes = ref<Node[]>([]);
+  const actClk = ref(false);
+
+  const toggleClk = () => {
+    clkNodes.value.forEach((node) => {
+      console.log("Toggling CLK node", node.id);
+      console.log("CLK node value", node.value);
+      //node.value = node.value === 1 ? 0 : 1;
+      //node.color = node.value === 1 ? "#00AA11" : "#FF4D4D";
+      console.log("CLK node value2", node.value);
+      if (node) {
+        const outputNodeId = node.outputs[0];
+        if (outputNodeId === undefined) {
+          console.log("Invalid output node");
+          return;
+        }
+        const outputNode = nodesStore.getNode(outputNodeId);
+        if (!outputNode) {
+          console.log("Invalid output node");
+          return;
+        }
+
+        console.log("Output node value", outputNode.value);
+        outputNode.value = node.value;
+        outputNode.color = outputNode.value === 1 ? "#00AA11" : "#FF4D4D";
+      }
+    });
+  };
+
+  // Usando o composable
+  const { isRunning, start, stop } = useInterval(toggleClk, 1000);
+
+  function startClock() {
+    actClk.value = true;
+    start();
+  }
+
+  function stopClock() {
+    stop();
+  }
 
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
   const typeConditions = [
@@ -67,6 +109,11 @@ export const useCircuitStore = defineStore("circuit", () => {
         },
       });
     }
+  }
+
+  function addClkNode(node: Node) {
+    clkNodes.value.push(node);
+    startClock();
   }
 
   const setSelectedAction = (action: Actions) => {
@@ -420,5 +467,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     generateLabel,
     generateNodeLabel,
     createNoteNode,
+    addClkNode,
+    actClk,
   };
 });
