@@ -3,6 +3,7 @@ import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
 import { useCircuitStore } from "@/simulation/stores/circuit";
 import { Actions } from "~/simulation/types/actions";
+import type { Edge } from "v-network-graph";
 
 export function useLogicPropagation() {
   const circuitStore = useCircuitStore();
@@ -12,13 +13,10 @@ export function useLogicPropagation() {
 
     const inputNode = circuitStore.getNode(inputNodeId);
 
-    if (inputNode?.type === NodeType.CLK && !circuitStore.actClk) {
-      console.log("addClkNode");
-      circuitStore.addClkNode(inputNode);
-      return;
-    }
-
-    if (inputNode?.role !== NodeRole.INPUT) {
+    if (
+      inputNode?.role !== NodeRole.INPUT &&
+      inputNode?.type !== NodeType.CLK
+    ) {
       console.log("Invalid input node");
       return;
     }
@@ -44,19 +42,38 @@ export function useLogicPropagation() {
     const queue: string[] = [outputNode.id];
     const nodes = circuitStore.nodes;
 
+    const nodesIds: string[] = [];
+
     while (queue.length > 0) {
       const currentNodeId = queue.shift()!;
       const currentNode = nodes[currentNodeId];
 
       if (!currentNode) continue;
 
-      const inputValues = currentNode.inputs.map(
-        (inputId) => nodes[inputId]?.value
-      );
-
-      if (inputValues.some((value) => value === -1)) {
+      if (nodesIds.includes(currentNodeId)) {
+        console.log("Loop detected");
         break;
       }
+
+      nodesIds.push(currentNodeId);
+
+      const inputValues = currentNode.inputs.map((inputId) => {
+        const value = nodes[inputId]?.value;
+
+        const toValue = value === -1 ? 0 : value;
+
+        if (nodes[inputId]) {
+          if (toValue !== undefined) {
+            nodes[inputId].value = toValue;
+          }
+        }
+
+        return toValue;
+      });
+
+      // if (inputValues.some((value) => value === -1)) {
+      //   break;
+      // }
 
       // Calcular novo valor baseado no tipo de nó
       switch (currentNode.type) {
@@ -183,7 +200,7 @@ export function useLogicPropagation() {
           currentNode.value = -1; // Caso padrão, sem valor
       }
 
-      if (currentNode.label && currentNode.label.slice(0, 4) === "~(Q_")
+      if (currentNode.inverted)
         currentNode.value = currentNode.value === 1 ? 0 : 1;
 
       // Atualizar a cor do nó com base no valor calculado
@@ -248,8 +265,7 @@ export function useLogicPropagation() {
 
       let value: number = sourceNode?.value ?? -1;
 
-      if (targetNode?.label?.slice(0, 4) === "~(Q_")
-        value = value === 1 ? 0 : 1;
+      if (targetNode?.inverted) value = value === 1 ? 0 : 1;
 
       // Atualize a cor da aresta com base nos valores dos nós
       if (sourceNode && targetNode) {

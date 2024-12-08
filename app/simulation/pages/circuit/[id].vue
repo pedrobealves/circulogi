@@ -45,7 +45,6 @@ const getRadius = computed(() => (radius: number, nodeId: any) => {
   const value = {
     [NodeType.OUT]: radius,
     [NodeType.IN]: radius - 12,
-    [NodeType.CLK]: radius - 12,
   } as const;
 
   return value[node.type as keyof typeof value] || radius - 4;
@@ -62,9 +61,26 @@ const showType = computed(() => (nodeId: any) => {
 
 const route = useRoute();
 const id = route.params.id as string;
+try {
+  const { data, error } = await useFetch(`/api/v1/circuits/${id}`, {
+    headers: useRequestHeaders(["cookie"]),
+  });
+
+  if (error.value) {
+    throw new Error("Erro ao buscar o circuito");
+  }
+
+  if (!data.value) {
+    console.error("Dados do circuito não encontrados");
+  }
+  circuitStore.circuit = data.value;
+} catch (error) {
+  console.error("Erro ao buscar o circuito:", error);
+}
 
 onMounted(() => {
-  circuitStore.fetchCircuit(id);
+  circuitStore.loadCircuit(circuitStore.circuit?.content);
+  circuitStore.startClock();
 });
 </script>
 

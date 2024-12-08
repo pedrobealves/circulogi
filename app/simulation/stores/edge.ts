@@ -46,11 +46,18 @@ export const useEdgesStore = defineStore("edges", () => {
     );
   }
 
+  function $reset() {
+    Object.keys(edges).forEach((edgeId) => {
+      delete edges[edgeId];
+    });
+  }
+
   return {
     edges,
     addEdge,
     removeEdge,
     removeEdgeById,
     setEdges,
+    $reset,
   };
 });

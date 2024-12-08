@@ -118,8 +118,15 @@ export function useComponentFactory() {
     }
 
     // Cria os nós de saída
-    const outputQ = createNode(NodeType.OUT, NodeRole.COMPONENT);
-    const outputNotQ = createNode(NodeType.OUT, NodeRole.COMPONENT);
+    const outputQ = createNode(NodeType.OUT, NodeRole.COMPONENT, 12, 1, 1);
+    const outputNotQ = createNode(
+      NodeType.OUT,
+      NodeRole.COMPONENT,
+      12,
+      1,
+      1,
+      true
+    );
 
     outputQ.label = "Q_" + circuitStore.generateLabel();
     outputNotQ.label = circuitStore.generateNodeLabel(
@@ -156,6 +163,8 @@ export function useComponentFactory() {
     edges: Edge[];
   } {
     const mainNode: Node = createNode(type, NodeRole.INPUT, 32);
+
+    if (type === NodeType.CLK) circuitStore.addClkNode(mainNode);
 
     const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
 

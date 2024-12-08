@@ -1,8 +1,8 @@
 import { ref, onUnmounted } from "vue";
 
-export function useInterval(callback, delay = 1000) {
+export function useInterval(callback: { (): void; (): void }, delay = 1000) {
   const isRunning = ref(false); // Estado para verificar se o intervalo está ativo
-  let intervalId = null;
+  let intervalId: string | number | NodeJS.Timeout | null | undefined = null;
 
   // Iniciar o intervalo
   const start = () => {
@@ -17,7 +17,9 @@ export function useInterval(callback, delay = 1000) {
   // Parar o intervalo
   const stop = () => {
     if (isRunning.value) {
-      clearInterval(intervalId);
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
       intervalId = null;
       isRunning.value = false;
     }
