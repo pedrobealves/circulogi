@@ -27,7 +27,7 @@ export const useCircuitStore = defineStore("circuit", () => {
   const counter = ref(0);
   const layout = nodesStore.layouts;
   const clkNodes = ref<Node[]>([]);
-  const actClk = ref(false);
+  const actClk = ref<boolean>(false);
 
   function $reset() {
     nodesStore.$reset();
@@ -38,45 +38,42 @@ export const useCircuitStore = defineStore("circuit", () => {
     counter.value = 0;
     layout.nodes = {};
     clkNodes.value = [];
-    actClk.value = false;
   }
 
   const toggleClk = () => {
     clkNodes.value.forEach((node) => {
-      console.log("Toggling CLK node", node.id);
-      console.log("CLK node value", node.value);
-      //node.value = node.value === 1 ? 0 : 1;
-      //node.color = node.value === 1 ? "#00AA11" : "#FF4D4D";
-      console.log("CLK node value2", node.value);
       if (node) {
-        const outputNodeId = node.outputs[0];
-        if (outputNodeId === undefined) {
-          console.log("Invalid output node");
-          return;
-        }
-        const outputNode = nodesStore.getNode(outputNodeId);
-        if (!outputNode) {
-          console.log("Invalid output node");
-          return;
-        }
-
-        console.log("Output node value", outputNode.value);
-        outputNode.value = node.value;
-        outputNode.color = outputNode.value === 1 ? "#00AA11" : "#FF4D4D";
+        useLogicPropagation().solve(node.id);
       }
     });
   };
 
   // Usando o composable
-  const { isRunning, start, stop } = useInterval(toggleClk, 1000);
+  const { isRunning, start, stop } = useInterval(toggleClk, 5000);
 
   function startClock() {
-    actClk.value = true;
-    start();
+    clkNodes.value = Object.values(nodesStore.nodes).filter(
+      (node) => node.type === NodeType.CLK
+    );
+    if (clkNodes.value.length > 0) {
+      console.log("Clock started");
+      start();
+      actClk.value = true;
+    }
   }
 
   function stopClock() {
     stop();
+    actClk.value = false;
+  }
+
+  function addClkNode(node: Node) {
+    clkNodes.value.push(node);
+    if (!actClk.value) {
+      console.log("Clock started");
+      start();
+      actClk.value = true;
+    }
   }
 
   const roleConditions = [NodeRole.INPUT, NodeRole.OUTPUT];
@@ -92,34 +89,46 @@ export const useCircuitStore = defineStore("circuit", () => {
     edges: edgesStore.edges,
   }));
 
-  watch(
-    graphState,
-    () => {
-      if (autoSave.value) save();
-    },
-    { deep: true }
-  );
+  // watch(
+  //   graphState,
+  //   () => {
+  //     if (autoSave.value) save();
+  //   },
+  //   { deep: true }
+  // );
 
   async function save() {
-    const nodes = Object.values(nodesStore.nodes);
-    const edges = Object.values(edgesStore.edges);
-    const count = counter.value;
-    const layoutCircuit = layout;
+    try {
+      const nodes = Object.values(nodesStore.nodes);
+      const edges = Object.values(edgesStore.edges);
+      const count = counter.value;
+      const layoutCircuit = layout;
 
-    const circuitUpdated = {
-      nodes,
-      edges,
-      count,
-      layout: layoutCircuit,
-    };
+      const circuitUpdated = {
+        nodes,
+        edges,
+        count,
+        layout: layoutCircuit,
+      };
 
-    if (circuit.value) {
-      await $fetch(`/api/v1/circuits/${circuit.value.id}`, {
-        method: "PUT",
-        body: {
+      if (circuit.value) {
+        const body = {
           content: JSON.stringify(circuitUpdated),
-        },
-      });
+        };
+
+        const response = await $fetch(`/api/v1/circuits/${circuit.value.id}`, {
+          method: "PUT",
+          body,
+        });
+
+        if (response.ok) {
+          console.log("Circuito atualizado com sucesso.");
+        } else {
+          console.error("Erro ao atualizar o circuito: " + response.statusText);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao salvar o circuito:", error);
     }
   }
 
@@ -129,11 +138,6 @@ export const useCircuitStore = defineStore("circuit", () => {
         method: "DELETE",
       });
     }
-  }
-
-  function addClkNode(node: Node) {
-    clkNodes.value.push(node);
-    startClock();
   }
 
   const setSelectedAction = (action: Actions) => {
@@ -225,6 +229,7 @@ export const useCircuitStore = defineStore("circuit", () => {
       nodesStore.addNode(mainNode);
       nodes.forEach((node) => nodesStore.addNode(node));
       edges.forEach((edge) => edgesStore.addEdge(edge));
+      save();
     }
   }
 
@@ -479,5 +484,6 @@ export const useCircuitStore = defineStore("circuit", () => {
     deleteCircuit,
     loadCircuit,
     $reset,
+    startClock,
   };
 });

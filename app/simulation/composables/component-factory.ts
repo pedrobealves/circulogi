@@ -164,6 +164,8 @@ export function useComponentFactory() {
   } {
     const mainNode: Node = createNode(type, NodeRole.INPUT, 32);
 
+    if (type === NodeType.CLK) circuitStore.addClkNode(mainNode);
+
     const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
 
     mainNode.outputs.push(outNode.id);

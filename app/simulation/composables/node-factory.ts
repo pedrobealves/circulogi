@@ -23,7 +23,7 @@ export function useNodeFactory() {
       delay: 0,
       maxInputs,
       maxOutputs,
-      value: 0,
+      value: -1,
       size,
       color: "#363636",
       inverted,

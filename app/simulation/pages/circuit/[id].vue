@@ -45,7 +45,6 @@ const getRadius = computed(() => (radius: number, nodeId: any) => {
   const value = {
     [NodeType.OUT]: radius,
     [NodeType.IN]: radius - 12,
-    [NodeType.CLK]: radius - 12,
   } as const;
 
   return value[node.type as keyof typeof value] || radius - 4;
@@ -75,10 +74,14 @@ try {
     console.error("Dados do circuito não encontrados");
   }
   circuitStore.circuit = data.value;
-  circuitStore.loadCircuit(circuitStore.circuit?.content);
 } catch (error) {
   console.error("Erro ao buscar o circuito:", error);
 }
+
+onMounted(() => {
+  circuitStore.loadCircuit(circuitStore.circuit?.content);
+  circuitStore.startClock();
+});
 </script>
 
 <template>
