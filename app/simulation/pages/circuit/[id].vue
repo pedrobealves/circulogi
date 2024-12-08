@@ -62,10 +62,23 @@ const showType = computed(() => (nodeId: any) => {
 
 const route = useRoute();
 const id = route.params.id as string;
+try {
+  const { data, error } = await useFetch(`/api/v1/circuits/${id}`, {
+    headers: useRequestHeaders(["cookie"]),
+  });
 
-onMounted(() => {
-  circuitStore.fetchCircuit(id);
-});
+  if (error.value) {
+    throw new Error("Erro ao buscar o circuito");
+  }
+
+  if (!data.value) {
+    console.error("Dados do circuito não encontrados");
+  }
+  circuitStore.circuit = data.value;
+  circuitStore.loadCircuit(circuitStore.circuit?.content);
+} catch (error) {
+  console.error("Erro ao buscar o circuito:", error);
+}
 </script>
 
 <template>

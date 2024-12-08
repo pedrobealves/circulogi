@@ -9,7 +9,8 @@ export function useNodeFactory() {
     role: NodeRole,
     size: number = 12,
     maxInputs: number = 1,
-    maxOutputs: number = 1
+    maxOutputs: number = 1,
+    inverted: boolean = false
   ): Node {
     const id = nanoid();
     return {
@@ -25,6 +26,7 @@ export function useNodeFactory() {
       value: 0,
       size,
       color: "#363636",
+      inverted,
     };
   }
 

@@ -183,7 +183,7 @@ export function useLogicPropagation() {
           currentNode.value = -1; // Caso padrão, sem valor
       }
 
-      if (currentNode.label && currentNode.label.slice(0, 4) === "~(Q_")
+      if (currentNode.inverted)
         currentNode.value = currentNode.value === 1 ? 0 : 1;
 
       // Atualizar a cor do nó com base no valor calculado
@@ -248,8 +248,7 @@ export function useLogicPropagation() {
 
       let value: number = sourceNode?.value ?? -1;
 
-      if (targetNode?.label?.slice(0, 4) === "~(Q_")
-        value = value === 1 ? 0 : 1;
+      if (targetNode?.inverted) value = value === 1 ? 0 : 1;
 
       // Atualize a cor da aresta com base nos valores dos nós
       if (sourceNode && targetNode) {

@@ -189,15 +189,12 @@ async function createNewCircuit() {
 
 const {
   data: circuitData,
-  status,
+  pending,
   error,
   refresh,
-  clear,
-} = useAsyncData("circuits", () =>
-  $fetch("/api/v1/circuits", {
-    headers: useRequestHeaders(["cookie"]),
-  })
-);
+} = await useFetch("/api/v1/circuits", {
+  headers: useRequestHeaders(["cookie"]), // Envia os cookies na requisição
+});
 
 watchEffect(() => {
   if (!user.value) {
@@ -219,12 +216,29 @@ function open(circuit: Circuit) {
 
 async function deleteCircuit() {
   if (circuitSelected?.value?.id) {
-    // Validação completa
-    await circuitStore.deleteCircuit(circuitSelected.value.id); // Aguarda a exclusão
-    circuitSelected.value = null; // Limpa o circuito selecionado (opcional)
-    await refresh(); // Garante que a atualização ocorra após a exclusão
+    const deletedCircuitId = circuitSelected.value.id;
+
+    // Remova imediatamente da interface
+    circuitData.value = circuitData.value.filter(
+      (circuit) => circuit.id !== deletedCircuitId
+    );
+    circuitSelected.value = null;
+
+    try {
+      await circuitStore.deleteCircuit(deletedCircuitId);
+    } catch (error) {
+      console.error("Erro ao excluir circuito:", error);
+      // Caso a exclusão falhe, recarregue os dados do servidor
+      await refresh();
+    }
   }
 }
+
+onMounted(async () => {
+  console.log("Dashboard mounted");
+  await circuitStore.$reset();
+  console.log("Circuit store reset");
+});
 
 function onSubmit(values: any) {
   isDialogOpen.value = false;
@@ -455,8 +469,8 @@ function onSubmit(values: any) {
                 :key="circuit.id"
                 class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
                 :to="{ name: 'circuit-id', params: { id: circuit.id } }"
-                target="_blank"
                 @contextmenu="open(circuit)"
+                replace
               >
                 <div
                   class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"

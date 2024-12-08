@@ -32,6 +32,12 @@ export const useNodesStore = defineStore("nodes", () => {
     delete nodes[nodeId];
   }
 
+  function $reset() {
+    Object.keys(nodes).forEach((nodeId) => {
+      delete nodes[nodeId];
+    });
+  }
+
   return {
     nodes,
     getNode,
@@ -40,5 +46,6 @@ export const useNodesStore = defineStore("nodes", () => {
     nodeCount,
     layouts,
     setNodes,
+    $reset,
   };
 });

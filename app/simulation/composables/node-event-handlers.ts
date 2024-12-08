@@ -3,10 +3,12 @@ import { useNodeCollision } from "./events/node-collision";
 import { useNodeSelect } from "./events/node-select";
 import { useLogicPropagation } from "./events/logic-propagation";
 import { useActionsNode } from "./events/actions-node";
+import { useSaveState } from "./events/save-state";
 // Função para otimizar o registro de manipuladores de eventos
 export function useNodeEventHandlers() {
   // Inicialize dependências fora dos manipuladores para evitar recriação repetitiva
   const { solve } = useLogicPropagation();
+  const { save } = useSaveState();
   const { handleNodeCollision } = useNodeCollision();
   const { selectNode, nodesConnDeHighlight, nodesConnHighlight } =
     useNodeSelect();
@@ -44,6 +46,7 @@ export function useNodeEventHandlers() {
     },
     "node:pointerup": () => {
       nodesConnDeHighlight(); // Remove o destaque das conexões
+      save();
     },
     "node:pointermove": (node) => {
       throttledHandleNodeCollision(node); // Lida com colisões de forma otimizada

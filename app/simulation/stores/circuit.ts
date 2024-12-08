@@ -29,6 +29,18 @@ export const useCircuitStore = defineStore("circuit", () => {
   const clkNodes = ref<Node[]>([]);
   const actClk = ref(false);
 
+  function $reset() {
+    nodesStore.$reset();
+    edgesStore.$reset();
+    autoSave.value = false;
+    selectedAction.value = undefined;
+    circuit.value = undefined;
+    counter.value = 0;
+    layout.nodes = {};
+    clkNodes.value = [];
+    actClk.value = false;
+  }
+
   const toggleClk = () => {
     clkNodes.value.forEach((node) => {
       console.log("Toggling CLK node", node.id);
@@ -160,26 +172,14 @@ export const useCircuitStore = defineStore("circuit", () => {
     [NodeType.NOTE]: "",
   };
 
-  const fetchCircuit = async (id: string) => {
-    try {
-      const response = await fetch(`/api/v1/circuits/${id}`);
-      if (!response.ok) {
-        throw new Error("Erro ao buscar o circuito");
-      }
-      circuit.value = await response.json();
-      if (circuit.value?.content) loadCircuit(circuit.value?.content);
-      autoSave.value = true;
-    } catch (error) {
-      console.error("Erro ao buscar o circuito:", error);
-    }
-  };
-
   function loadCircuit(content: any) {
+    if (!content) return;
     const circuitContent = JSON.parse(content);
     nodesStore.setNodes(circuitContent.nodes);
     edgesStore.setEdges(circuitContent.edges);
     layout.nodes = circuitContent.layout.nodes;
     counter.value = circuitContent.count;
+    autoSave.value = true;
   }
 
   function generateNodeLabel(inputs: string[], type: NodeType): string {
@@ -453,7 +453,6 @@ export const useCircuitStore = defineStore("circuit", () => {
 
   return {
     circuit,
-    fetchCircuit,
     save,
     createComponentAndAdd,
     nodes: nodesStore.nodes,
@@ -478,5 +477,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     addClkNode,
     actClk,
     deleteCircuit,
+    loadCircuit,
+    $reset,
   };
 });
