@@ -47,7 +47,7 @@ export const update = async (
     data: {
       name: circuit.name,
       version: circuit.version,
-      content: circuit.content ?? Prisma.JsonNull,
+      content: circuit.content ?? undefined,
       updatedAt: new Date(),
     },
   });

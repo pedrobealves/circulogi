@@ -4,6 +4,55 @@ import { useCircuitStore } from "@/simulation/stores/circuit";
 const circuitStore = useCircuitStore();
 
 const circuit = computed(() => circuitStore.circuit);
+
+function saveCircuit() {
+  circuitStore.save();
+}
+
+async function exportImage() {
+  const graph: any = circuitStore.graph;
+
+  console.log(graph);
+
+  if (!graph.value) return;
+  const svgText = await graph.value.exportAsSvgText();
+
+  // Criar um elemento <img> temporário para carregar o SVG
+  const svgImage = new Image();
+  const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
+  const svgUrl = URL.createObjectURL(svgBlob);
+  svgImage.src = svgUrl;
+
+  // Quando a imagem estiver carregada, desenhá-la no canvas e exportar como PNG
+  svgImage.onload = () => {
+    // Criar o canvas e definir seu tamanho com base no SVG
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const width = svgImage.width;
+    const height = svgImage.height;
+
+    if (ctx) {
+      // Ajusta o tamanho do canvas para o tamanho do SVG
+      canvas.width = width;
+      canvas.height = height;
+
+      // Desenhar o SVG no canvas
+      ctx.drawImage(svgImage, 0, 0, width, height);
+
+      // Converter o conteúdo do canvas para um URL de imagem (por exemplo, PNG)
+      const imageUrl = canvas.toDataURL("image/png");
+
+      // Criar um link de download e disparar o clique para baixar a imagem
+      const a = document.createElement("a");
+      a.href = imageUrl;
+      a.download = "network-graph.png"; // nome do arquivo para download
+      a.click();
+
+      // Liberar a URL do objeto quando não for mais necessária
+      window.URL.revokeObjectURL(svgUrl);
+    }
+  };
+}
 </script>
 
 <template>
@@ -154,6 +203,78 @@ const circuit = computed(() => circuitStore.circuit);
             </defs>
           </svg>
         </div>
+      </div>
+    </div>
+    <div class="flex -mx-[5px]">
+      <svg
+        width="14"
+        height="30"
+        viewBox="0 0 14 30"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect y="6" width="13" height="18" fill="#E7E7E7" />
+        <path
+          d="M7 5C3.7999 5.125 0.5 0 0.5 0L3 6L7 8L11 6L13 0C13 0 10.0478 4.88095 7 5Z"
+          fill="#E7E7E7"
+        />
+        <path
+          d="M7 24C3.7999 23.875 0 28.5 0 28.5L2 21L7 19.5L11.5 21L13.5 29.5C13.5 29.5 10.0478 24.1191 7 24Z"
+          fill="#E7E7E7"
+        />
+      </svg>
+    </div>
+    <div
+      class="flex w-full h-full items-center justify-center bg-[#E7E7E7] rounded-full px-[6px] gap-[3px]"
+    >
+      <div
+        class="flex w-11 h-11 bg-white rounded-full items-center justify-center cursor-pointer hover:bg-zinc-950 hover:text-white duration-300 transition-colors"
+        @click="saveCircuit"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          >
+            <path
+              d="M6 4h10l4 4v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2"
+            />
+            <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0-4 0m4-10v4H8V4" />
+          </g>
+        </svg>
+      </div>
+      <div
+        class="flex w-11 h-11 bg-white rounded-full items-center justify-center cursor-pointer hover:bg-zinc-950 hover:text-white duration-300 transition-colors"
+        @click="exportImage"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          >
+            <path
+              d="M15 8h.01M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"
+            />
+            <path d="m3 16l5-5c.928-.893 2.072-.893 3 0l5 5" />
+            <path d="m14 14l1-1c.928-.893 2.072-.893 3 0l3 3" />
+          </g>
+        </svg>
       </div>
     </div>
   </div>
