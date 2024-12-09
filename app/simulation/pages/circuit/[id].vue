@@ -81,13 +81,18 @@ try {
 onMounted(() => {
   circuitStore.loadCircuit(circuitStore.circuit?.content);
   circuitStore.startClock();
+
+  circuitStore.setGraph(graph);
 });
+
+const graph = ref<any>();
 </script>
 
 <template>
   <div class="board">
     <v-network-graph
       class="graph"
+      ref="graph"
       v-model:layouts="circuitStore.layout"
       :nodes="circuitStore.nodes"
       :edges="circuitStore.edges"

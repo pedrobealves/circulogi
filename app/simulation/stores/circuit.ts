@@ -22,12 +22,17 @@ export const useCircuitStore = defineStore("circuit", () => {
   const { createEdge } = useEdgeFactory();
   const { createComponent } = useComponentFactory();
   const autoSave = ref(false);
+  const graph = ref<vNG.Instance>();
 
   const selectedAction = ref<Actions>();
   const counter = ref(0);
   const layout = nodesStore.layouts;
   const clkNodes = ref<Node[]>([]);
   const actClk = ref<boolean>(false);
+
+  function setGraph(graphInstance: any) {
+    graph.value = graphInstance;
+  }
 
   function $reset() {
     nodesStore.$reset();
@@ -485,5 +490,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     loadCircuit,
     $reset,
     startClock,
+    graph,
+    setGraph,
   };
 });
