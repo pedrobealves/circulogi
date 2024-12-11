@@ -83,7 +83,61 @@ onMounted(() => {
   circuitStore.startClock();
 
   circuitStore.setGraph(graph);
+
+  setTimeout(() => {
+    uploadCover();
+  }, 3000);
 });
+
+async function uploadCover() {
+  if (!graph.value) return;
+  const svgText = await graph.value.exportAsSvgText();
+
+  // Criar um elemento <img> temporário para carregar o SVG
+  const svgImage = new Image();
+  const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
+  const svgUrl = URL.createObjectURL(svgBlob);
+  svgImage.src = svgUrl;
+
+  // Quando a imagem estiver carregada, desenhá-la no canvas e exportar como PNG
+  svgImage.onload = () => {
+    // Criar o canvas e desenhar a imagem
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = svgImage.width;
+    canvas.height = svgImage.height;
+
+    if (ctx) {
+      ctx.drawImage(svgImage, 0, 0, svgImage.width, svgImage.height);
+
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          const formData = new FormData();
+          formData.append("file", blob);
+          formData.append("name", circuitStore.circuit?.id || "");
+          formData.append("path", "circuits");
+
+          try {
+            const response = await $fetch("/api/v1/circuits/image", {
+              method: "POST",
+              body: formData,
+            });
+
+            await $fetch(`/api/v1/circuits/${circuitStore.circuit?.id}`, {
+              method: "PUT",
+              body: {
+                cover: response.url,
+              },
+            });
+          } catch (err) {
+          } finally {
+            URL.revokeObjectURL(svgUrl);
+          }
+        }
+      }, "image/png");
+    }
+  };
+}
 
 const graph = ref<any>();
 </script>

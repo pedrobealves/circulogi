@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",
+    "@nuxt/image",
   ],
   i18n: {
     lazy: false,

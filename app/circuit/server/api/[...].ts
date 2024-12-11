@@ -10,5 +10,9 @@ router.delete(
   "/circuits/:id",
   defineEventHandler(circuitApplication.deleteCircuit)
 );
+router.post(
+  "/circuits/image",
+  defineEventHandler(circuitApplication.uploadImage)
+);
 
 export default useBase("/api/v1", router.handler);

@@ -5,6 +5,7 @@ export const circuitSchema = z.object({
   name: z.string(),
   version: z.string(),
   content: z.any(),
+  cover: z.string(),
   userId: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -13,6 +14,7 @@ export const circuitSchema = z.object({
 export const newCircuitSchema = circuitSchema.omit({
   id: true,
   content: true,
+  cover: true,
   userId: true,
   createdAt: true,
   updatedAt: true,

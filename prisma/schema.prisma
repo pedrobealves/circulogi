@@ -18,6 +18,7 @@ model Circuit {
   content   Json?    @db.JsonB
   userId    String   @map("user_id") @db.Uuid
   version   String   @db.Text
+  cover     String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
