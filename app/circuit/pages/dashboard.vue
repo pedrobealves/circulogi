@@ -502,7 +502,13 @@ onMounted(async () => {
               >
                 <div
                   class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out"
-                ></div>
+                >
+                  <NuxtImg
+                    v-if="circuit.cover"
+                    :src="circuit.cover"
+                    class="bg-cover bg-center"
+                  />
+                </div>
                 <div class="flex flex-wrap w-full">
                   <div class="flex flex-col max-w-60 p-2 mt-1">
                     <h3

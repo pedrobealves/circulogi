@@ -47,6 +47,7 @@ export const update = async (
     data: {
       name: circuit.name,
       version: circuit.version,
+      cover: circuit.cover ?? undefined,
       content: circuit.content ?? undefined,
       updatedAt: new Date(),
     },

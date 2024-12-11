@@ -2,7 +2,7 @@ import { H3Event } from "h3";
 import * as circuitService from "../services/circuit";
 import type { Circuit } from "../types/circuit";
 import { newCircuitSchema } from "../types/circuit";
-import { serverSupabaseUser } from "#supabase/server";
+import { serverSupabaseUser, serverSupabaseClient } from "#supabase/server";
 import authMiddleware from "../utils/auth";
 
 export const create = async (event: H3Event): Promise<Circuit | string> => {
@@ -140,4 +140,64 @@ export const deleteCircuit = async (event: H3Event): Promise<string> => {
 
   setResponseStatus(event, 200);
   return "Circuito deletado com sucesso";
+};
+
+type ImageBody = {
+  path: string;
+  name: string;
+  file: string;
+  type: string;
+};
+
+export const uploadImage = async (event: H3Event) => {
+  await authMiddleware(event);
+
+  try {
+    // Lê os dados enviados no formulário multipart/form-data
+    const formData = await readMultipartFormData(event);
+
+    // Transforma o array em um objeto para acesso fácil
+    const body = formData
+      ? Object.fromEntries(
+          formData.map(({ name, data, filename, type }) => [
+            name,
+            filename ? { data, filename, type } : data.toString(),
+          ])
+        )
+      : {};
+
+    // Validação: certifique-se de que o arquivo foi enviado
+    if (!body.file || typeof body.file !== "object") {
+      throw new Error("Arquivo não enviado ou inválido.");
+    }
+
+    const file = body.file;
+    const filePath = `${body.path}/${body.name}.png`;
+
+    // Cria um Blob a partir do buffer de dados
+    const blob = new Blob([file.data], { type: file.type });
+
+    // Faz o upload para o Supabase
+    const response = await (await serverSupabaseClient(event)).storage
+      .from("images")
+      .upload(filePath, blob, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    const { data } = await (await serverSupabaseClient(event)).storage
+      .from("images")
+      .getPublicUrl(filePath);
+
+    // Retorna a resposta do upload
+    return {
+      url: data.publicUrl,
+      error: response.error?.message,
+    };
+  } catch (error: any) {
+    console.error("Erro no upload:", error);
+    return {
+      error: error.message,
+    };
+  }
 };
