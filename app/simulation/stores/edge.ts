@@ -1,3 +1,4 @@
+import { defineStore } from "pinia";
 import type { Edge } from "~/simulation/types/edge";
 
 export const useEdgesStore = defineStore("edges", () => {

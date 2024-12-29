@@ -1,12 +1,12 @@
 import type { Node } from "~/simulation/types/node";
 import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "@/simulation/stores/simulation";
 import { Actions } from "~/simulation/types/actions";
 import type { Edge } from "v-network-graph";
 
 export function useLogicPropagation() {
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
 
   function solve(inputNodeId: string) {
     if (circuitStore.selectedAction !== Actions.SELECT) return;

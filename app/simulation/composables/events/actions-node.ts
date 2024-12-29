@@ -1,10 +1,10 @@
-import { useCircuitStore } from "~/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 import { Actions } from "~/simulation/types/actions";
 import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
 
 export function useActionsNode() {
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
 
   function executeAction(nodeId: string) {
     const option: Actions = circuitStore.selectedAction ?? Actions.SELECT;

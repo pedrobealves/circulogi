@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",
     "@nuxt/image",
+    "nuxt-time",
   ],
   i18n: {
     lazy: false,
