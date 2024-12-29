@@ -5,12 +5,12 @@ import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
 import { useNodeFactory } from "./node-factory";
 import { useEdgeFactory } from "./edge-factory";
-import { useCircuitStore } from "~/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 
 export function useComponentFactory() {
   const { createNode } = useNodeFactory();
   const { createEdge } = useEdgeFactory();
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
 
   function createComponent(
     type: NodeType
@@ -59,7 +59,7 @@ export function useComponentFactory() {
     const inputNodes: Node[] = [];
     for (let i = 0; i < inputCount; i++) {
       const inputNode = createNode(NodeType.IN, NodeRole.COMPONENT);
-      inputNode.label = circuitStore.generateLabel();
+      inputNode.label = inputNode.alias = circuitStore.generateLabel();
       inputNodes.push(inputNode);
     }
     const outputNode = createNode(NodeType.OUT, NodeRole.COMPONENT); // O nó de saída
@@ -68,7 +68,6 @@ export function useComponentFactory() {
       [inputNodes[0]?.label ?? "", inputNodes[1]?.label ?? ""],
       type
     );
-
     // Criar as arestas para os nós de entrada e saída
     const edges: Edge[] = inputNodes.map((inputNode) =>
       createEdge(inputNode.id, mainNode.id)
@@ -101,8 +100,8 @@ export function useComponentFactory() {
       const inputD = createNode(NodeType.IN, NodeRole.COMPONENT);
       const inputCLK = createNode(NodeType.IN, NodeRole.COMPONENT);
 
-      inputD.label = circuitStore.generateLabel();
-      inputCLK.label = "CLK";
+      inputD.label = inputD.alias = circuitStore.generateLabel();
+      inputCLK.label = inputCLK.alias = "CLK";
 
       inputNodes.push(inputD, inputCLK);
     } else {

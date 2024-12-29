@@ -1,7 +1,7 @@
-import { useCircuitStore } from "~/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 
 export function useSaveState() {
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
 
   function save() {
     circuitStore.save();

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 
-const circuitStore = useCircuitStore();
+const circuitStore = useSimulationStore();
 
 const circuit = computed(() => circuitStore.circuit);
 

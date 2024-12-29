@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "@/simulation/stores/simulation";
 import { NodeType } from "~/simulation/types/nodeType";
 import { useNetworkGraph } from "~/simulation/composables/network-graph";
 import { useNodeEventHandlers } from "~/simulation/composables/node-event-handlers";
-import { NodeRole } from "../../types/nodeRole";
-import ToolbarOptions from "../../components/ToolbarOptions.vue";
+import { NodeRole } from "@/simulation/types/nodeRole";
+import ToolbarOptions from "@/simulation/components/ToolbarOptions.vue";
 
-const circuitStore = useCircuitStore();
+const circuitStore = useSimulationStore();
 
 const { configs } = useNetworkGraph();
 
@@ -126,7 +126,7 @@ async function uploadCover() {
             await $fetch(`/api/v1/circuits/${circuitStore.circuit?.id}`, {
               method: "PUT",
               body: {
-                cover: response.url,
+                thumbnail: response.url,
               },
             });
           } catch (err) {
@@ -140,6 +140,11 @@ async function uploadCover() {
 }
 
 const graph = ref<any>();
+
+useSeoMeta({
+  title: circuitStore.circuit?.name,
+  ogTitle: circuitStore.circuit?.name,
+});
 </script>
 
 <template>

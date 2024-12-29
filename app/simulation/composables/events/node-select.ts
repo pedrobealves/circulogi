@@ -1,8 +1,8 @@
-import { useCircuitStore } from "~/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 import { NodeType } from "~/simulation/types/nodeType";
 
 export function useNodeSelect() {
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
   const nodesOriginalColors = new Map<string, string>();
 
   const connDetect = computed(() => circuitStore.isConnDetection);
@@ -58,22 +58,18 @@ export function useNodeSelect() {
   function updateLabels() {
     // Função para atualizar o label de um nó, seja AND, OR, NOT, etc.
     const updateNodeLabel = (node: any) => {
-      if (
-        node.label === "CLK" ||
-        node.label.slice(0, 2) === "S_" ||
-        node.label.slice(0, 2) === "R_" ||
-        node.label.slice(0, 2) === "J_" ||
-        node.label.slice(0, 2) === "K_"
-      )
-        return;
-
-      if (node.label.slice(0, 2) === "Q_" || node.label.slice(0, 4) === "~(Q_")
-        return;
-
       if (!node.inputs[0]) return;
 
       const mainNode = circuitStore.getNode(node.inputs[0]);
       if (!mainNode || !mainNode.inputs || mainNode.inputs.length < 1) return;
+
+      if (
+        mainNode.type === NodeType.JK ||
+        mainNode.type === NodeType.SR ||
+        mainNode.type === NodeType.T ||
+        mainNode.type === NodeType.D
+      )
+        return;
 
       // Lógica para tratar o nó do tipo NOT
       if (mainNode.type === NodeType.NOT && mainNode.inputs[0]) {

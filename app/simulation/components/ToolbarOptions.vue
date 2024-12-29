@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 import { Actions } from "@/simulation/types/actions";
 import { computed } from "vue";
 
 // Pinia Store
-const circuitStore = useCircuitStore();
+const circuitStore = useSimulationStore();
 
 // Itens do menu utilizando o enum Actions
 const items = [

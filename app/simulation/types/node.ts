@@ -9,6 +9,7 @@ export interface Node extends vNG.Node {
   label?: string;
   id: string;
   name: string;
+  alias?: string;
   type: NodeType; // IN, AND, OR, OUT, etc.
   role: NodeRole; // INPUT, OUTPUT, etc.
   inputs: string[]; // IDs dos nós de entrada

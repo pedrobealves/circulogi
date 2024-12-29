@@ -2,7 +2,7 @@
 import { ref, reactive, computed } from "vue";
 import gsap from "gsap";
 import { NodeType } from "@/simulation/types/nodeType";
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "~/simulation/stores/simulation";
 
 import {
   Dialog,
@@ -16,7 +16,7 @@ import {
 
 import { Textarea } from "@/common/components/ui/textarea";
 
-const circuitStore = useCircuitStore();
+const circuitStore = useSimulationStore();
 
 // Dados iniciais
 const items = [
@@ -214,7 +214,7 @@ function onSubmit(values: any) {
     </div>
   </div>
   <Form v-slot="{ handleSubmit }">
-    <Dialog :open="isDialogOpen">
+    <Dialog v-model:open="isDialogOpen">
       <DialogContent
         class="sm:max-w-[425px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 max-h-[90dvh]"
       >

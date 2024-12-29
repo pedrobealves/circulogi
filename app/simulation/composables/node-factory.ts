@@ -15,7 +15,7 @@ export function useNodeFactory() {
     const id = nanoid();
     return {
       id,
-      name: `${type}_${id}`,
+      name: `${type.toLowerCase()}`,
       type,
       role,
       inputs: [],

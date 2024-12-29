@@ -28,7 +28,7 @@ export const create = async (
 export const getAll = async (userId: string): Promise<Circuit[]> => {
   return await client.circuit.findMany({
     where: { userId: userId },
-    orderBy: { createdAt: "desc" },
+    orderBy: { updatedAt: "desc" },
   });
 };
 
@@ -47,7 +47,7 @@ export const update = async (
     data: {
       name: circuit.name,
       version: circuit.version,
-      cover: circuit.cover ?? undefined,
+      thumbnail: circuit.thumbnail ?? undefined,
       content: circuit.content ?? undefined,
       updatedAt: new Date(),
     },

@@ -1,11 +1,11 @@
 import * as vNG from "v-network-graph";
 import { useNodesStore } from "@/simulation/stores/node";
-import { useCircuitStore } from "@/simulation/stores/circuit";
+import { useSimulationStore } from "@/simulation/stores/simulation";
 
 import type { Node } from "~/simulation/types/node";
 
 export function useNodeCollision() {
-  const circuitStore = useCircuitStore();
+  const circuitStore = useSimulationStore();
 
   const nodes = circuitStore.nodes;
   const layoutNodes = computed(() => circuitStore.layout.nodes);

@@ -15,9 +15,9 @@ import { Label } from "@/common/components/ui/label";
 import { Copy } from "lucide-vue-next";
 
 import IconPlus from "~icons/lucide/plus";
-import { useCircuitStore } from "../stores/circuit";
+import { useSimulationStore } from "../stores/simulation";
 
-const circuitStore = useCircuitStore();
+const circuitStore = useSimulationStore();
 
 const link = computed(() => {
   const hostname: String = "https://circulogi.pedrobernardi.com"; // Garantir que o hostname não seja undefined

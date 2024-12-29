@@ -12,8 +12,9 @@ import { useInterval } from "@/simulation/composables/clock";
 
 import { useComponentFactory } from "~/simulation/composables/component-factory";
 import { useLogicPropagation } from "../composables/events/logic-propagation";
+import { defineStore } from "pinia";
 
-export const useCircuitStore = defineStore("circuit", () => {
+export const useSimulationStore = defineStore("simulation", () => {
   const circuit = ref<Circuit>();
 
   const nodesStore = useNodesStore();
@@ -284,6 +285,9 @@ export const useCircuitStore = defineStore("circuit", () => {
     connectionNode.label =
       targetNode.type === NodeType.IN ? targetNode.label : sourceNode.label;
 
+    connectionNode.alias =
+      targetNode.type === NodeType.IN ? targetNode.alias : sourceNode.alias;
+
     connectionNode.inputs.push(...sourceInputs); // O CONNECTION recebe a
     connectionNode.outputs.push(...targetOutputs);
 
@@ -348,6 +352,9 @@ export const useCircuitStore = defineStore("circuit", () => {
     }
 
     const nodeIn = createNode(NodeType.IN, NodeRole.COMPONENT);
+
+    nodeIn.label = connectionNode.alias;
+
     const nodeOut = createNode(NodeType.OUT, NodeRole.COMPONENT);
 
     // Restaurar os nós de entrada e saída

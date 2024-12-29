@@ -25,6 +25,7 @@
     "lucide-vue-next": "^0.462.0",
     "nanoid": "^5.0.8",
     "nuxt": "^3.14.1592",
+    "nuxt-time": "1.0.3",
     "pinia": "^2.2.7",
     "project-name-generator": "^2.1.9",
     "radix-vue": "^1.9.10",

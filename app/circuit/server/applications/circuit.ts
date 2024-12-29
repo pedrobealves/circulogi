@@ -48,7 +48,7 @@ export const getById = async (event: H3Event): Promise<Circuit | string> => {
 
   const circuitId = getRouterParam(event, "id") || "";
 
-  if (circuitId == "") {
+  if (circuitId == "" || !circuitId) {
     throw createError({
       status: 400,
       message: "Id do circuito inválido",
@@ -76,7 +76,7 @@ export const update = async (event: H3Event): Promise<string> => {
   const circuitId = getRouterParam(event, "id") || "";
   const body = await readBody<Circuit>(event);
 
-  if (circuitId == "") {
+  if (circuitId == "" || !circuitId) {
     throw createError({
       status: 400,
       message: "Id do circuito inválido",
@@ -114,7 +114,7 @@ export const deleteCircuit = async (event: H3Event): Promise<string> => {
 
   const circuitId = getRouterParam(event, "id") || "";
 
-  if (circuitId == "") {
+  if (circuitId == "" || !circuitId) {
     throw createError({
       status: 400,
       message: "Id do circuito inválido",
