@@ -7,125 +7,195 @@ import { useNodeFactory } from "./node-factory";
 import { useEdgeFactory } from "./edge-factory";
 import { useSimulationStore } from "~/simulation/stores/simulation";
 
+interface ComponentResult {
+  mainNode: Node;
+  nodes: Node[];
+  edges: Edge[];
+}
+
+interface ComponentConfig {
+  type: NodeType;
+  inputCount?: number;
+}
+
 export function useComponentFactory() {
-  const { createNode } = useNodeFactory();
+  const nodeFactory = useNodeFactory();
   const { createEdge } = useEdgeFactory();
   const circuitStore = useSimulationStore();
 
-  function createComponent(
-    type: NodeType
-  ): { mainNode: Node; nodes: Node[]; edges: Edge[] } | null {
-    const componentFactory: {
-      [key in NodeType]?: () => {
-        mainNode: Node;
-        nodes: Node[];
-        edges: Edge[];
-      };
-    } = {
-      [NodeType.AND]: () => createDefaultComponent(NodeType.AND),
-      [NodeType.OR]: () => createDefaultComponent(NodeType.OR),
-      [NodeType.XOR]: () => createDefaultComponent(NodeType.XOR),
-      [NodeType.NAND]: () => createDefaultComponent(NodeType.NAND),
-      [NodeType.NOR]: () => createDefaultComponent(NodeType.NOR),
-      [NodeType.XNOR]: () => createDefaultComponent(NodeType.XNOR),
-      [NodeType.D]: () => createFlipFlopComponent(NodeType.D),
-      [NodeType.JK]: () => createFlipFlopComponent(NodeType.JK),
-      [NodeType.SR]: () => createFlipFlopComponent(NodeType.SR),
-      [NodeType.T]: () => createFlipFlopComponent(NodeType.T),
-      [NodeType.NOT]: () => createNotComponent(),
-      [NodeType.IN]: () => createInputNode(NodeType.IN),
-      [NodeType.CLK]: () => createInputNode(NodeType.CLK),
-      [NodeType.OUT]: () => createOutputNode(),
-    };
+  const componentFactoryMap: Record<NodeType, () => ComponentResult> = {
+    [NodeType.AND]: () => createDefaultComponent({ type: NodeType.AND }),
+    [NodeType.OR]: () => createDefaultComponent({ type: NodeType.OR }),
+    [NodeType.XOR]: () => createDefaultComponent({ type: NodeType.XOR }),
+    [NodeType.NAND]: () => createDefaultComponent({ type: NodeType.NAND }),
+    [NodeType.NOR]: () => createDefaultComponent({ type: NodeType.NOR }),
+    [NodeType.XNOR]: () => createDefaultComponent({ type: NodeType.XNOR }),
+    [NodeType.D]: () => createFlipFlopComponent(NodeType.D),
+    [NodeType.JK]: () => createFlipFlopComponent(NodeType.JK),
+    [NodeType.SR]: () => createFlipFlopComponent(NodeType.SR),
+    [NodeType.T]: () => createFlipFlopComponent(NodeType.T),
+    [NodeType.NOT]: () => createNotComponent(),
+    [NodeType.IN]: () => createInputNode(NodeType.IN),
+    [NodeType.CLK]: () => createInputNode(NodeType.CLK),
+    [NodeType.OUT]: () => createOutputNode(),
+    [NodeType.CONN]: function (): ComponentResult {
+      throw new Error("Function not implemented.");
+    },
+    [NodeType.NOTE]: function (): ComponentResult {
+      throw new Error("Function not implemented.");
+    },
+  };
 
-    const createComponentFunc = componentFactory[type];
-    if (!createComponentFunc) {
-      console.warn(`Tipo de componente desconhecido: ${type}`);
+  function createComponent(type: NodeType): ComponentResult | null {
+    const factory = componentFactoryMap[type];
+    if (!factory) {
+      console.warn(`Unknown component type: ${type}`);
       return null;
     }
-    return createComponentFunc();
+    return factory();
   }
-  // Função que cria um componente lógico padrão (AND, OR, etc.)
-  function createDefaultComponent(
-    type: NodeType,
-    inputCount: number = 2
-  ): {
-    mainNode: Node;
-    nodes: Node[];
-    edges: Edge[];
-  } {
-    const mainNode = createNode(type, NodeRole.COMPONENT, 32, 2, 1); // O nó principal
 
-    const inputNodes: Node[] = [];
-    for (let i = 0; i < inputCount; i++) {
-      const inputNode = createNode(NodeType.IN, NodeRole.COMPONENT);
+  function connectNodes(sourceNode: Node, targetNode: Node): Edge {
+    const edge = createEdge(sourceNode.id, targetNode.id);
+    sourceNode.outputs.push(targetNode.id);
+    targetNode.inputs.push(sourceNode.id);
+    return edge;
+  }
+
+  function setupNodeConnections(
+    mainNode: Node,
+    inputNodes: Node[],
+    outputNodes: Node[]
+  ): Edge[] {
+    const edges: Edge[] = [];
+    inputNodes.forEach((inputNode) => {
+      edges.push(connectNodes(inputNode, mainNode));
+    });
+    outputNodes.forEach((outputNode) => {
+      edges.push(connectNodes(mainNode, outputNode));
+    });
+    return edges;
+  }
+
+  function createDefaultComponent(config: ComponentConfig): ComponentResult {
+    const { type, inputCount = 2 } = config;
+
+    const mainNode = nodeFactory.createNode({
+      type,
+      role: NodeRole.COMPONENT,
+      size: 32,
+      maxInputs: 2,
+      maxOutputs: 1,
+    });
+
+    const inputNodes = Array.from({ length: inputCount }, () => {
+      const inputNode = nodeFactory.createNode({
+        type: NodeType.IN,
+        role: NodeRole.COMPONENT,
+      });
       inputNode.label = inputNode.alias = circuitStore.generateLabel();
-      inputNodes.push(inputNode);
-    }
-    const outputNode = createNode(NodeType.OUT, NodeRole.COMPONENT); // O nó de saída
+      return inputNode;
+    });
+
+    const outputNode = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+    });
 
     outputNode.label = circuitStore.generateNodeLabel(
-      [inputNodes[0]?.label ?? "", inputNodes[1]?.label ?? ""],
+      inputNodes.map((node) => node.label ?? ""),
       type
     );
-    // Criar as arestas para os nós de entrada e saída
-    const edges: Edge[] = inputNodes.map((inputNode) =>
-      createEdge(inputNode.id, mainNode.id)
-    );
-    edges.push(createEdge(mainNode.id, outputNode.id));
 
-    // Adicionar as referências de entrada e saída aos nós
-    mainNode.inputs.push(...inputNodes.map((node) => node.id));
-    mainNode.outputs.push(outputNode.id);
-
-    inputNodes.forEach((inputNode) => inputNode.outputs.push(mainNode.id));
-    outputNode.inputs.push(mainNode.id);
-
+    const edges = setupNodeConnections(mainNode, inputNodes, [outputNode]);
     return { mainNode, nodes: [...inputNodes, outputNode], edges };
   }
 
-  function createFlipFlopComponent(type: NodeType): {
-    mainNode: Node;
-    nodes: Node[];
-    edges: Edge[];
-  } {
-    const inputNodes: Node[] = [];
-    const outputNodes: Node[] = [];
+  function createFlipFlopComponent(type: NodeType): ComponentResult {
+    const mainNode = nodeFactory.createNode({
+      type,
+      role: NodeRole.COMPONENT,
+      size: 32,
+    });
 
-    // Cria o nó principal do Flip-Flop
-    const mainNode = createNode(type, NodeRole.COMPONENT, 32);
+    const inputNodes = createFlipFlopInputs(type);
+    const outputNodes = createFlipFlopOutputs();
 
-    // Configuração específica para o Flip-Flop tipo D
+    mainNode.inputs.push(...inputNodes.map((node) => node.id));
+    mainNode.outputs.push(...outputNodes.map((node) => node.id));
+
+    const edges = setupNodeConnections(mainNode, inputNodes, outputNodes);
+    return { mainNode, nodes: [...inputNodes, ...outputNodes], edges };
+  }
+
+  function createFlipFlopInputs(type: NodeType): Node[] {
     if (type === NodeType.D || type === NodeType.T) {
-      const inputD = createNode(NodeType.IN, NodeRole.COMPONENT);
-      const inputCLK = createNode(NodeType.IN, NodeRole.COMPONENT);
-
-      inputD.label = inputD.alias = circuitStore.generateLabel();
-      inputCLK.label = inputCLK.alias = "CLK";
-
-      inputNodes.push(inputD, inputCLK);
-    } else {
-      const inputCLK = createNode(NodeType.IN, NodeRole.COMPONENT);
-      const input1 = createNode(NodeType.IN, NodeRole.COMPONENT);
-      const input2 = createNode(NodeType.IN, NodeRole.COMPONENT);
-
-      inputCLK.label = "CLK";
-      input1.label = type.charAt(0) + "_" + circuitStore.generateLabel();
-      input2.label = type.charAt(1) + "_" + circuitStore.generateLabel();
-
-      inputNodes.push(inputCLK, input1, input2);
+      return createDTFlipFlopInputs(type);
     }
+    return createJKSRFlipFlopInputs(type);
+  }
 
-    // Cria os nós de saída
-    const outputQ = createNode(NodeType.OUT, NodeRole.COMPONENT, 12, 1, 1);
-    const outputNotQ = createNode(
-      NodeType.OUT,
-      NodeRole.COMPONENT,
-      12,
-      1,
-      1,
-      true
-    );
+  function createDTFlipFlopInputs(type: NodeType): Node[] {
+    const inputDT = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+      alias: type,
+    });
+    const inputCLK = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+      alias: "CLK",
+    });
+
+    inputDT.label = type + "_" + circuitStore.generateLabel();
+    inputCLK.label = inputCLK.alias = "CLK";
+
+    return [inputDT, inputCLK];
+  }
+
+  function createJKSRFlipFlopInputs(type: NodeType): Node[] {
+    const inputCLK = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+      alias: "CLK",
+    });
+    const input1 = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+      alias: type.charAt(0),
+    });
+    const input2 = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+      alias: type.charAt(1),
+    });
+
+    inputCLK.label = "CLK";
+    input1.label = type.charAt(0) + "_" + circuitStore.generateLabel();
+    input2.label = type.charAt(1) + "_" + circuitStore.generateLabel();
+
+    return [inputCLK, input1, input2];
+  }
+
+  function createFlipFlopOutputs(): Node[] {
+    const outputQ = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+      size: 12,
+      maxInputs: 1,
+      maxOutputs: 1,
+      alias: "Q",
+    });
+
+    const outputNotQ = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+      size: 12,
+      maxInputs: 1,
+      maxOutputs: 1,
+      inverted: true,
+      alias: "Q",
+    });
 
     outputQ.label = "Q_" + circuitStore.generateLabel();
     outputNotQ.label = circuitStore.generateNodeLabel(
@@ -133,81 +203,63 @@ export function useComponentFactory() {
       NodeType.NOT
     );
 
-    outputNodes.push(outputQ, outputNotQ);
-
-    // Atualiza as entradas e saídas do nó principal
-    mainNode.inputs.push(...inputNodes.map((node) => node.id));
-    mainNode.outputs.push(...outputNodes.map((node) => node.id));
-
-    // Conecta entradas ao nó principal
-    const edges: Edge[] = inputNodes.map((inputNode) =>
-      createEdge(inputNode.id, mainNode.id)
-    );
-
-    // Conecta o nó principal às saídas
-    edges.push(
-      ...outputNodes.map((outputNode) => createEdge(mainNode.id, outputNode.id))
-    );
-
-    // Atualiza as conexões nos nós de entrada e saída
-    inputNodes.forEach((inputNode) => inputNode.outputs.push(mainNode.id));
-    outputNodes.forEach((outputNode) => outputNode.inputs.push(mainNode.id));
-
-    return { mainNode, nodes: [...inputNodes, ...outputNodes], edges };
+    return [outputQ, outputNotQ];
   }
 
-  function createInputNode(type: NodeType): {
-    mainNode: Node;
-    nodes: Node[];
-    edges: Edge[];
-  } {
-    const mainNode: Node = createNode(type, NodeRole.INPUT, 32);
+  function createInputNode(type: NodeType): ComponentResult {
+    const mainNode = nodeFactory.createNode({
+      type,
+      role: NodeRole.INPUT,
+      size: 32,
+    });
 
-    if (type === NodeType.CLK) circuitStore.addClkNode(mainNode);
+    if (type === NodeType.CLK) {
+      circuitStore.addClkNode(mainNode);
+    }
 
-    const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
+    const outNode = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+    });
 
-    mainNode.outputs.push(outNode.id);
-    outNode.inputs.push(mainNode.id);
-
-    const edges: Edge[] = [createEdge(mainNode.id, outNode.id)];
-
+    const edges = [connectNodes(mainNode, outNode)];
     return { mainNode, nodes: [outNode], edges };
   }
 
-  function createOutputNode(): {
-    mainNode: Node;
-    nodes: Node[];
-    edges: Edge[];
-  } {
-    const mainNode: Node = createNode(NodeType.OUT, NodeRole.OUTPUT, 32);
+  function createOutputNode(): ComponentResult {
+    const mainNode = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.OUTPUT,
+      size: 32,
+    });
 
-    const outNode = createNode(NodeType.IN, NodeRole.COMPONENT);
+    const inNode = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+    });
 
-    mainNode.inputs.push(outNode.id);
-    outNode.outputs.push(mainNode.id);
-
-    const edges: Edge[] = [createEdge(outNode.id, mainNode.id)];
-
-    return { mainNode, nodes: [outNode], edges };
+    const edges = [connectNodes(inNode, mainNode)];
+    return { mainNode, nodes: [inNode], edges };
   }
 
-  //Função para criar o componente NOT (com apenas uma entrada e uma saída)
-  function createNotComponent(): {
-    mainNode: Node;
-    nodes: Node[];
-    edges: Edge[];
-  } {
-    const mainNode: Node = createNode(
-      NodeType.NOT,
-      NodeRole.COMPONENT,
-      32,
-      1,
-      1
-    );
+  function createNotComponent(): ComponentResult {
+    const mainNode = nodeFactory.createNode({
+      type: NodeType.NOT,
+      role: NodeRole.COMPONENT,
+      size: 32,
+      maxInputs: 1,
+      maxOutputs: 1,
+    });
 
-    const inNode = createNode(NodeType.IN, NodeRole.COMPONENT);
-    const outNode = createNode(NodeType.OUT, NodeRole.COMPONENT);
+    const inNode = nodeFactory.createNode({
+      type: NodeType.IN,
+      role: NodeRole.COMPONENT,
+    });
+
+    const outNode = nodeFactory.createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+    });
 
     inNode.label = circuitStore.generateLabel();
     outNode.label = circuitStore.generateNodeLabel(
@@ -215,17 +267,7 @@ export function useComponentFactory() {
       NodeType.NOT
     );
 
-    const edges: Edge[] = [
-      createEdge(inNode.id, mainNode.id),
-      createEdge(mainNode.id, outNode.id),
-    ];
-
-    inNode.outputs.push(mainNode.id);
-    outNode.inputs.push(mainNode.id);
-
-    mainNode.inputs.push(inNode.id);
-    mainNode.outputs.push(outNode.id);
-
+    const edges = setupNodeConnections(mainNode, [inNode], [outNode]);
     return { mainNode, nodes: [inNode, outNode], edges };
   }
 
