@@ -1,126 +1,173 @@
 import * as vNG from "v-network-graph";
-import { useNodesStore } from "@/simulation/stores/node";
 import { useSimulationStore } from "@/simulation/stores/simulation";
-
 import type { Node } from "~/simulation/types/node";
+import { computed, ref, watch } from "vue";
+
+// Types and interfaces
+interface NodePosition {
+  x?: number;
+  y?: number;
+  type: string;
+}
+
+interface NodesPosition {
+  [key: string]: NodePosition;
+}
+
+interface CollisionState {
+  isDetecting: boolean;
+  currentNode: any | null;
+  collidingNode: string | null;
+}
+
+interface CollisionConfig {
+  radius: number;
+  validTypes: string[];
+}
 
 export function useNodeCollision() {
+  // Store initialization
   const circuitStore = useSimulationStore();
-
   const nodes = circuitStore.nodes;
+
+  // Computed properties
   const layoutNodes = computed(() => circuitStore.layout.nodes);
 
-  const collisionRadius: number = 50; // Raio de colisão, pode ser ajustado conforme necessário
+  // Configuration
+  const config: CollisionConfig = {
+    radius: 50,
+    validTypes: ["IN", "OUT"],
+  };
 
-  const isCollisionDetectionInProgress = ref(false);
-  const currentNode = ref<any>(null); // Variável para armazenar o nó atual
-  const currentColliding = ref<any>(null); // Variável para armazenar o nó atual
+  // State management
+  const state = reactive<CollisionState>({
+    isDetecting: false,
+    currentNode: null,
+    collidingNode: null,
+  });
 
-  interface NodePosition {
-    x?: number;
-    y?: number;
-    type: string;
-  }
-
-  interface NodesPosition {
-    [key: string]: NodePosition;
-  }
-
-  // Função para calcular a distância entre dois pontos
-  function calculateDistance(
+  // Utility functions
+  const calculateDistance = (
     point1: vNG.Position,
     point2: vNG.Position
-  ): number {
+  ): number => {
     const dx = point1.x - point2.x;
     const dy = point1.y - point2.y;
     return Math.sqrt(dx * dx + dy * dy);
-  }
+  };
 
-  function isColliding(
+  const isValidNodeType = (node: Node): boolean => {
+    return config.validTypes.includes(node.type);
+  };
+
+  // Core collision detection
+  const findCollidingNode = (
     targetNode: vNG.Position,
     nodesPosition: NodesPosition,
     nodeToIgnore: string
-  ): string {
-    //console.log(targetNode)
-
+  ): string => {
     for (const nodeId in nodes) {
-      if (nodeId === nodeToIgnore) continue;
       if (
+        nodeId === nodeToIgnore ||
         !nodes[nodeId] ||
-        (nodes[nodeId].type !== "IN" && nodes[nodeId].type !== "OUT")
-      )
+        !isValidNodeType(nodes[nodeId])
+      ) {
         continue;
+      }
 
       const nodePosition = nodesPosition[nodeId];
-      if (!nodePosition) continue;
-      if (nodePosition.x !== undefined && nodePosition.y !== undefined) {
-        const distance = calculateDistance(
-          targetNode,
-          nodePosition as vNG.Position
-        );
-        if (distance <= collisionRadius) {
-          return nodeId; // Colisão detectada
-        }
+      if (!nodePosition?.x || !nodePosition?.y) continue;
+
+      const distance = calculateDistance(
+        targetNode,
+        nodePosition as vNG.Position
+      );
+
+      if (distance <= config.radius) {
+        return nodeId;
       }
     }
-    return "node"; // Nenhuma colisão detectada
-  }
 
-  function handleNodeCollision(node: { [name: string]: vNG.Position }) {
-    currentNode.value = node;
-    const nodeToIgnore: string = Object.keys(node)[0] || ""; // O nó que deve ser ignorado
-    const targetNode = node[nodeToIgnore];
+    return "node";
+  };
 
-    const selectedNodes = circuitStore.selectedNodes;
+  // Handle node movement and collision
+  const handleNodeCollision = (node: { [name: string]: vNG.Position }) => {
+    const nodeId = Object.keys(node)[0] || "";
+    const targetNode = node[nodeId];
 
-    //console.log(selectedNodes);
-
-    if (!selectedNodes) return;
-
-    if (selectedNodes.type !== "IN" && selectedNodes.type !== "OUT") return;
-
-    if (!targetNode) {
+    if (!targetNode || !isValidNodeForCollision(nodeId)) {
+      resetCollisionState();
       return;
     }
 
-    //console.log(JSON.parse(JSON.stringify(circuitStore.layout)).nodes);
-    const colliding: string = isColliding(
+    const collidingNodeId = findCollidingNode(
       targetNode,
       layoutNodes.value,
-      nodeToIgnore
+      nodeId
     );
 
-    if (colliding !== "node") {
-      currentColliding.value = colliding;
-      console.log("Colisão detectada com o nó: ", colliding);
-      isCollisionDetectionInProgress.value = true; // Redefina a flag após a conclusão
+    updateCollisionState(node, collidingNodeId);
+  };
+
+  // Helper functions
+  const isValidNodeForCollision = (nodeId: string): boolean => {
+    const selectedNodes = circuitStore.selectedNodes;
+    return !!selectedNodes && isValidNodeType(selectedNodes);
+  };
+
+  const updateCollisionState = (
+    node: { [name: string]: vNG.Position },
+    collidingNodeId: string
+  ) => {
+    state.currentNode = node;
+
+    if (collidingNodeId !== "node") {
+      state.collidingNode = collidingNodeId;
+      state.isDetecting = true;
+      console.log("Colisão detectada com o nó: ", collidingNodeId);
     } else {
-      isCollisionDetectionInProgress.value = false; // Redefina a flag após a conclusão
+      resetCollisionState();
     }
-  }
+  };
 
-  function detectCollision(node: Node) {
-    if (!node) return; // Verifique se o nó é válido
+  const resetCollisionState = () => {
+    state.isDetecting = false;
+    state.collidingNode = null;
+  };
 
-    const colliding: string = currentColliding.value;
+  // Process collision and create connection
+  const processCollision = (node: Node) => {
+    if (!node) return;
 
-    if (colliding !== "node") {
-      const firstKey = Object.keys(node)[0] ?? "";
+    const collidingNodeId = state.collidingNode;
+    if (collidingNodeId === "node" || !collidingNodeId) return;
 
-      const targetNode: Node = nodes[colliding]!;
-      const sourceNode: Node = nodes[firstKey]!;
+    const sourceNodeId = Object.keys(node)[0] ?? "";
+    if (!sourceNodeId) return;
 
+    const sourceNode = nodes[sourceNodeId];
+    const targetNode = nodes[collidingNodeId];
+
+    if (sourceNode && targetNode) {
       circuitStore.connectionNodes(sourceNode, targetNode);
     }
-  }
+  };
 
-  watch(isCollisionDetectionInProgress, (newValue) => {
-    if (newValue) {
-      detectCollision(currentNode.value);
+  // Watch for collision state changes
+  watch(
+    () => state.isDetecting,
+    (isDetecting) => {
+      if (isDetecting) {
+        processCollision(state.currentNode);
+      }
     }
-  });
+  );
 
   return {
     handleNodeCollision,
+    // Expose additional methods if needed
+    isCollisionInProgress: computed(() => state.isDetecting),
+    currentCollidingNode: computed(() => state.collidingNode),
   };
 }

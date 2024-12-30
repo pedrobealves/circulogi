@@ -5,229 +5,186 @@ import { useSimulationStore } from "@/simulation/stores/simulation";
 import { Actions } from "~/simulation/types/actions";
 import type { Edge } from "v-network-graph";
 
+// Types and interfaces
+interface NodeOperation {
+  (inputValues: number[]): number;
+}
+
+// Constants
+const NODE_COLORS = {
+  ACTIVE: "#00AA11",
+  INACTIVE: "#FF4D4D",
+  DEFAULT: "#9B9B9B",
+} as const;
+
 export function useLogicPropagation() {
   const circuitStore = useSimulationStore();
 
-  function solve(inputNodeId: string) {
-    if (circuitStore.selectedAction !== Actions.SELECT) return;
+  // Node operations map
+  const nodeOperations: Record<string, NodeOperation> = {
+    AND: (values) => Number(values.every((value) => value === 1)),
+    OR: (values) => Number(values.some((value) => value === 1)),
+    NOT: (values) => Number(values[0] !== 1),
+    XOR: (values) =>
+      values
+        .filter((v): v is number => v !== undefined)
+        .reduce((acc, value) => acc ^ value, 0),
+    NAND: (values) => Number(!values.every((value) => value === 1)),
+    NOR: (values) => Number(!values.some((value) => value === 1)),
+    XNOR: (values) =>
+      Number(
+        values
+          .filter((v): v is number => v !== undefined)
+          .reduce((acc, value) => acc ^ value, 0) === 0
+      ),
+    OUT: (values) => values[0] ?? -1,
+    CONN: (values) => values[0] ?? -1,
+  };
 
-    const inputNode = circuitStore.getNode(inputNodeId);
+  // Helper functions
+  const updateNodeValue = (node: Node, value: number) => {
+    node.value = node.inverted ? Number(!value) : value;
+    node.color = getColorForValue(node.value);
+  };
 
-    if (
-      inputNode?.role !== NodeRole.INPUT &&
-      inputNode?.type !== NodeType.CLK
-    ) {
-      console.log("Invalid input node");
-      return;
-    }
+  const getColorForValue = (value: number): string => {
+    if (value === 1) return NODE_COLORS.ACTIVE;
+    if (value === 0) return NODE_COLORS.INACTIVE;
+    return NODE_COLORS.DEFAULT;
+  };
 
-    const userValue = inputNode.value === 1 ? 0 : 1;
-    inputNode.value = userValue;
-    inputNode.color = inputNode.value === 1 ? "#00AA11" : "#FF4D4D";
+  const processSequentialLogic = (
+    currentNode: Node,
+    inputNode: Node,
+    nodes: Record<string, Node>
+  ) => {
+    const isClockTrigger = (node: Node) =>
+      inputNode.outputs[0] &&
+      nodes[inputNode.outputs[0]]?.label === NodeType.CLK &&
+      inputNode.value === 1;
 
-    const outputNodeId = inputNode.outputs[0];
-
-    if (outputNodeId === undefined) {
-      console.log("Invalid output node");
-      return;
-    }
-
-    const outputNode = circuitStore.nodes[outputNodeId];
-
-    if (!outputNode) {
-      console.log("Invalid output node");
-      return;
-    }
-
-    const queue: string[] = [outputNode.id];
-    const nodes = circuitStore.nodes;
-
-    const nodesIds: string[] = [];
-
-    while (queue.length > 0) {
-      const currentNodeId = queue.shift()!;
-      const currentNode = nodes[currentNodeId];
-
-      if (!currentNode) continue;
-
-      if (nodesIds.includes(currentNodeId)) {
-        console.log("Loop detected");
-        break;
-      }
-
-      nodesIds.push(currentNodeId);
-
-      const inputValues = currentNode.inputs.map((inputId) => {
-        const value = nodes[inputId]?.value;
-
-        const toValue = value === -1 ? 0 : value;
-
-        if (nodes[inputId]) {
-          if (toValue !== undefined) {
-            nodes[inputId].value = toValue;
-          }
-        }
-
-        return toValue;
-      });
-
-      // if (inputValues.some((value) => value === -1)) {
-      //   break;
-      // }
-
-      // Calcular novo valor baseado no tipo de nó
-      switch (currentNode.type) {
-        case "AND":
-          currentNode.value = inputValues.every((value) => value === 1) ? 1 : 0;
-          break;
-        case "OR":
-          currentNode.value = inputValues.some((value) => value === 1) ? 1 : 0;
-          break;
-        case "NOT":
-          currentNode.value = inputValues[0] === 1 ? 0 : 1;
-          break;
-        case "XOR":
-          currentNode.value = inputValues
-            .filter((value): value is number => value !== undefined)
-            .reduce((acc, value) => acc ^ value, 0);
-          break;
-        case "NAND":
-          currentNode.value = inputValues.every((value) => value === 1) ? 0 : 1;
-          break;
-        case "NOR":
-          currentNode.value = inputValues.some((value) => value === 1) ? 0 : 1;
-          break;
-        case "XNOR":
-          currentNode.value =
-            inputValues
-              .filter((value): value is number => value !== undefined)
-              .reduce((acc, value) => acc ^ value, 0) === 0
-              ? 1
-              : 0;
-          break;
-        case "D":
+    switch (currentNode.type) {
+      case "D":
+        if (isClockTrigger(currentNode)) {
           const inputValue = getValueByLabel(
             currentNode.inputs,
             nodes,
             NodeType.CLK,
             false
           );
-          if (inputNode.outputs[0]) {
-            const nodeInput = nodes[inputNode.outputs[0]];
-            if (nodeInput?.label === NodeType.CLK && inputNode.value === 1) {
-              currentNode.value = +(getValueByLabel(
-                currentNode.inputs,
-                nodes,
-                NodeType.CLK,
-                true
-              )
-                ? inputValue
-                : !inputValue);
-            }
-          }
-          break;
-        case "T":
-          if (inputNode.outputs[0]) {
-            const nodeInput = nodes[inputNode.outputs[0]];
-            if (nodeInput?.label === NodeType.CLK && inputNode.value === 1) {
-              currentNode.value = +!currentNode.value;
-            }
-          }
-          break;
-        case "SR":
-          const sValue = searchValueByLabel(
-            currentNode.inputs,
-            nodes,
-            "S",
-            true
-          ); // Valor do Set
-          const rValue = searchValueByLabel(
-            currentNode.inputs,
-            nodes,
-            "R",
-            true
-          ); // Valor do Reset
+          currentNode.value = Number(
+            getValueByLabel(currentNode.inputs, nodes, NodeType.CLK, true)
+              ? inputValue
+              : !inputValue
+          );
+        }
+        break;
 
-          if (inputNode.outputs[0]) {
-            const nodeInput = nodes[inputNode.outputs[0]];
-            if (nodeInput?.label === NodeType.CLK && inputNode.value === 1) {
-              if (sValue && !rValue) {
-                currentNode.value = 1; // Set
-              } else if (!sValue && rValue) {
-                currentNode.value = 0; // Reset
-              } else if (sValue && rValue) {
-                console.log("Invalid SR state");
-              }
-              // Se S e R forem ambos 0, mantém o estado anterior
-            }
-          }
-          break;
+      case "T":
+        if (isClockTrigger(currentNode)) {
+          currentNode.value = Number(!currentNode.value);
+        }
+        break;
 
-        case "JK":
-          const jValue = searchValueByLabel(
-            currentNode.inputs,
-            nodes,
-            "J",
-            true
-          ); // Valor de J
-          const kValue = searchValueByLabel(
-            currentNode.inputs,
-            nodes,
-            "K",
-            true
-          ); // Valor de K
+      case "SR":
+        if (isClockTrigger(currentNode)) {
+          const sValue = searchValueByAlias(currentNode.inputs, nodes, "S");
+          const rValue = searchValueByAlias(currentNode.inputs, nodes, "R");
 
-          if (inputNode.outputs[0]) {
-            const nodeInput = nodes[inputNode.outputs[0]];
-            if (nodeInput?.label === NodeType.CLK && inputNode.value === 1) {
-              if (!jValue && !kValue) {
-                // Mantém o estado
-              } else if (jValue && !kValue) {
-                currentNode.value = 1; // Set
-              } else if (!jValue && kValue) {
-                currentNode.value = 0; // Reset
-              } else if (jValue && kValue) {
-                currentNode.value = +!currentNode.value; // Toggle
-              }
-            }
-          }
-          break;
-        case "OUT":
-        case "CONN":
-          currentNode.value = inputValues[0] ?? -1;
-          break;
-        default:
-          currentNode.value = -1; // Caso padrão, sem valor
+          if (sValue && !rValue) currentNode.value = 1;
+          else if (!sValue && rValue) currentNode.value = 0;
+          else if (sValue && rValue) console.log("Invalid SR state");
+        }
+        break;
+
+      case "JK":
+        if (isClockTrigger(currentNode)) {
+          const jValue = searchValueByAlias(currentNode.inputs, nodes, "J");
+          const kValue = searchValueByAlias(currentNode.inputs, nodes, "K");
+
+          if (jValue && !kValue) currentNode.value = 1;
+          else if (!jValue && kValue) currentNode.value = 0;
+          else if (jValue && kValue)
+            currentNode.value = Number(!currentNode.value);
+        }
+        break;
+    }
+  };
+
+  const propagateLogic = (
+    startNodeId: string,
+    inputNode: Node,
+    nodes: Record<string, Node>
+  ) => {
+    const queue: string[] = [startNodeId];
+    const processedNodes: string[] = [];
+
+    while (queue.length > 0) {
+      const currentNodeId = queue.shift()!;
+      const currentNode = nodes[currentNodeId];
+
+      if (!currentNode || processedNodes.includes(currentNodeId)) continue;
+      processedNodes.push(currentNodeId);
+
+      const inputValues = currentNode.inputs.map((inputId) => {
+        const value = nodes[inputId]?.value;
+        const toValue = value === -1 ? 0 : value;
+
+        if (nodes[inputId] && toValue !== undefined) {
+          nodes[inputId].value = toValue;
+        }
+
+        return toValue;
+      });
+
+      if (nodeOperations[currentNode.type]) {
+        const operation = nodeOperations[currentNode.type];
+        if (operation) {
+          currentNode.value = operation(
+            inputValues.filter(
+              (v): v is number => v !== null && v !== undefined
+            )
+          );
+        }
+      } else {
+        processSequentialLogic(currentNode, inputNode, nodes);
       }
 
-      if (currentNode.inverted)
-        currentNode.value = currentNode.value === 1 ? 0 : 1;
-
-      // Atualizar a cor do nó com base no valor calculado
-      if (currentNode.value === 1) {
-        currentNode.color = "#00AA11"; // Ativo
-      } else if (currentNode.value === 0) {
-        currentNode.color = "#FF4D4D"; // Inativo
+      if (currentNode.value !== null) {
+        updateNodeValue(currentNode, currentNode.value);
       }
-
       queue.push(...currentNode.outputs);
     }
+  };
 
-    updateEdgeColors();
-  }
+  function solve(inputNodeId: string) {
+    if (circuitStore.selectedAction !== Actions.SELECT) return;
 
-  function getValueByType(
-    inputs: string[],
-    nodes: Record<string, Node>,
-    matchType: NodeType | null,
-    isMatch: boolean = true
-  ): number {
-    const targetNode = inputs.find((inputId) =>
-      isMatch
-        ? nodes[inputId]?.type === matchType
-        : nodes[inputId]?.type !== matchType
+    const inputNode = circuitStore.getNode(inputNodeId);
+    if (
+      !inputNode ||
+      (inputNode.role !== NodeRole.INPUT && inputNode.type !== NodeType.CLK)
+    ) {
+      console.log("Invalid input node");
+      return;
+    }
+
+    // Toggle input node value and update its color
+    const userValue = Number(!inputNode.value);
+    updateNodeValue(inputNode, userValue);
+
+    const outputNodeId = inputNode.outputs[0];
+    if (!outputNodeId || !circuitStore.nodes[outputNodeId]) {
+      console.log("Invalid output node");
+      return;
+    }
+
+    propagateLogic(
+      circuitStore.nodes[outputNodeId].id,
+      inputNode,
+      circuitStore.nodes
     );
-    return targetNode ? nodes[targetNode]?.value ?? -1 : -1;
+    updateEdgeColors();
   }
 
   function getValueByLabel(
@@ -244,39 +201,29 @@ export function useLogicPropagation() {
     return targetNode ? nodes[targetNode]?.value ?? -1 : -1;
   }
 
-  function searchValueByLabel(
+  function searchValueByAlias(
     inputs: string[],
     nodes: Record<string, Node>,
-    matchType: string,
-    isMatch: boolean = true
+    matchType: string
   ): number {
-    const targetNode = inputs.find((inputId) =>
-      isMatch
-        ? nodes[inputId]?.label?.charAt(0) === matchType
-        : nodes[inputId]?.label?.charAt(0) !== matchType
+    const targetNode = inputs.find(
+      (inputId) => nodes[inputId]?.alias === matchType
     );
     return targetNode ? nodes[targetNode]?.value ?? -1 : -1;
   }
 
   function updateEdgeColors() {
+    console.log("Updating edge colors");
     Object.values(circuitStore.edges).forEach((edge) => {
       const sourceNode = circuitStore.nodes[edge.source];
       const targetNode = circuitStore.nodes[edge.target];
 
-      let value: number = sourceNode?.value ?? -1;
+      if (!sourceNode || !targetNode) return;
 
-      if (targetNode?.inverted) value = value === 1 ? 0 : 1;
+      let value = sourceNode.value;
+      if (targetNode.inverted) value = targetNode.value;
 
-      // Atualize a cor da aresta com base nos valores dos nós
-      if (sourceNode && targetNode) {
-        if (value === 1) {
-          edge.color = "#00AA11"; // Ativo
-        } else if (value === 0) {
-          edge.color = "#FF4D4D"; // Inativo
-        } else {
-          edge.color = "#9B9B9B"; // Padrão
-        }
-      }
+      edge.color = getColorForValue(value ?? 0);
     });
   }
 

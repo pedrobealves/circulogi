@@ -240,13 +240,13 @@ export const useSimulationStore = defineStore("simulation", () => {
   }
 
   function createNoteNode(text: string) {
-    const component = useNodeFactory().createNode(
-      NodeType.NOTE,
-      NodeRole.COMPONENT,
-      32,
-      0,
-      0
-    );
+    const component = useNodeFactory().createNode({
+      type: NodeType.NOTE,
+      role: NodeRole.COMPONENT,
+      size: 32,
+      maxInputs: 0,
+      maxOutputs: 0,
+    });
     component.note = text;
     nodesStore.addNode(component);
     save();
@@ -280,7 +280,10 @@ export const useSimulationStore = defineStore("simulation", () => {
       return;
     }
 
-    const connectionNode: Node = createNode(NodeType.CONN, NodeRole.COMPONENT);
+    const connectionNode: Node = createNode({
+      type: NodeType.CONN,
+      role: NodeRole.COMPONENT,
+    });
 
     connectionNode.label =
       targetNode.type === NodeType.IN ? targetNode.label : sourceNode.label;
@@ -351,11 +354,14 @@ export const useSimulationStore = defineStore("simulation", () => {
       return;
     }
 
-    const nodeIn = createNode(NodeType.IN, NodeRole.COMPONENT);
+    const nodeIn = createNode({ type: NodeType.IN, role: NodeRole.COMPONENT });
 
     nodeIn.label = connectionNode.alias;
 
-    const nodeOut = createNode(NodeType.OUT, NodeRole.COMPONENT);
+    const nodeOut = createNode({
+      type: NodeType.OUT,
+      role: NodeRole.COMPONENT,
+    });
 
     // Restaurar os nós de entrada e saída
     // Restaurar as entradas do nó de origem
