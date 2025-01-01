@@ -188,7 +188,7 @@ useSeoMeta({
     <InteractiveContainer />
     <ToolbarOptions />
     <Tutorial />
-    <TopBar />
+    <TopBarContainer />
     <Share />
   </div>
 </template>

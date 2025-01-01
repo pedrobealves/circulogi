@@ -66,6 +66,7 @@ import {
   SquareTerminal,
   Trash2,
   EllipsisVertical,
+  Circle,
 } from "lucide-vue-next";
 
 import { ref } from "vue";
@@ -101,7 +102,7 @@ const data = {
   teams: [
     {
       name: "circulogi",
-      logo: GalleryVerticalEnd,
+      logo: Circle,
       plan: "",
     },
   ],
@@ -126,7 +127,7 @@ const data = {
       items: [
         {
           title: "Geral",
-          url: "#",
+          url: "/settings/profile",
         },
       ],
     },
@@ -178,23 +179,27 @@ watchEffect(() => {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger as-child>
-                <SidebarMenuButton
-                  size="lg"
-                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <div
-                    class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                <NuxtLink to="/dashboard">
+                  <SidebarMenuButton
+                    size="lg"
+                    class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
-                    <component :is="activeTeam?.logo" class="size-4" />
-                  </div>
-                  <div class="grid flex-1 text-left text-sm leading-tight">
-                    <span class="truncate font-semibold">{{
-                      activeTeam?.name
-                    }}</span>
-                    <span class="truncate text-xs">{{ activeTeam?.plan }}</span>
-                  </div>
-                  <ChevronsUpDown class="ml-auto" />
-                </SidebarMenuButton>
+                    <div
+                      class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
+                    >
+                      <component :is="activeTeam?.logo" class="size-4" />
+                    </div>
+                    <div class="grid flex-1 text-left text-sm leading-tight">
+                      <span class="truncate font-semibold">{{
+                        activeTeam?.name
+                      }}</span>
+                      <span class="truncate text-xs">{{
+                        activeTeam?.plan
+                      }}</span>
+                    </div>
+                    <!--- <ChevronsUpDown class="ml-auto" /> -->
+                  </SidebarMenuButton>
+                </NuxtLink>
               </DropdownMenuTrigger>
             </DropdownMenu>
           </SidebarMenuItem>
@@ -228,9 +233,9 @@ watchEffect(() => {
                       :key="subItem.title"
                     >
                       <SidebarMenuSubButton as-child>
-                        <a :href="subItem.url">
+                        <NuxtLink :to="subItem.url">
                           <span>{{ subItem.title }}</span>
-                        </a>
+                        </NuxtLink>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   </SidebarMenuSub>
@@ -283,7 +288,7 @@ watchEffect(() => {
               </DropdownMenu>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <NuxtLink to="dashboard" replace>
+              <NuxtLink to="/dashboard" replace>
                 <SidebarMenuButton class="text-sidebar-foreground/70">
                   <MoreHorizontal class="text-sidebar-foreground/70" />
                   <span>Mais</span>

@@ -113,43 +113,37 @@ useSeoMeta({
 </script>
 
 <template>
-  <header
-    class="flex px-8 h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-  >
-    <div class="flex items-center gap-2 px-4 w-full">
-      <SidebarTrigger class="-ml-1" />
-      <Separator orientation="vertical" class="mr-2 h-4" />
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem class="hidden md:block">
-            <BreadcrumbLink href="#"> Construa seu circuito </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator class="hidden md:block" />
-          <BreadcrumbItem>
-            <BreadcrumbPage v-if="!showInput">Todos</BreadcrumbPage>
-            <form
-              v-if="showInput && !isLoading"
-              @submit.prevent="createNewCircuit"
-              class="flex items-center gap-2"
-            >
-              <Input
-                v-model="inputValue"
-                type="text"
-                class="h-8 focus-visible:ring-0"
-                ref="input"
-              />
-            </form>
-            <LucideSpinner v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+  <HeaderBreadcrumb>
+    <template v-slot:breadcrumb>
+      <BreadcrumbItem class="hidden md:block">
+        <BreadcrumbLink href="#"> Construa seu circuito </BreadcrumbLink>
+      </BreadcrumbItem>
+      <BreadcrumbSeparator class="hidden md:block" />
+      <BreadcrumbItem>
+        <BreadcrumbPage v-if="!showInput">Todos</BreadcrumbPage>
+        <form
+          v-if="showInput && !isLoading"
+          @submit.prevent="createNewCircuit"
+          class="flex items-center gap-2"
+        >
+          <Input
+            v-model="inputValue"
+            type="text"
+            class="h-8 focus-visible:ring-0"
+            ref="input"
+          />
+        </form>
+        <LucideSpinner v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
+      </BreadcrumbItem>
+    </template>
+    <template v-slot:button>
       <div class="ml-auto">
         <Button :disabled="isLoading" @click="openInput()">
           <span>+ Criar Circuito</span></Button
         >
       </div>
-    </div>
-  </header>
+    </template>
+  </HeaderBreadcrumb>
   <div class="flex flex-1 flex-col gap-4 p-8 pt-0">
     <div v-if="circuitStore" class="grid gap-4 md:grid-cols-5">
       <ContextMenu
