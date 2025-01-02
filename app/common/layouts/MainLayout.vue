@@ -95,7 +95,7 @@ function handleLogOut() {
 // This is sample data.
 const data = {
   user: {
-    name: user.value?.user_metadata.full_name,
+    name: user.value?.user_metadata.name,
     email: user.value?.email,
     avatar: "",
   },
@@ -312,7 +312,7 @@ watchEffect(() => {
                       :src="data.user.avatar"
                       :alt="data.user.name"
                     />
-                    <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
+                    <AvatarFallback class="rounded-lg"> CL </AvatarFallback>
                   </Avatar>
                   <div class="grid flex-1 text-left text-sm leading-tight">
                     <span class="truncate font-semibold">{{
@@ -338,7 +338,7 @@ watchEffect(() => {
                         :src="data.user.avatar"
                         :alt="data.user.name"
                       />
-                      <AvatarFallback class="rounded-lg"> CN </AvatarFallback>
+                      <AvatarFallback class="rounded-lg"> CL </AvatarFallback>
                     </Avatar>
                     <div class="grid flex-1 text-left text-sm leading-tight">
                       <span class="truncate font-semibold">{{

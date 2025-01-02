@@ -1,8 +1,11 @@
 import { useSimulationStore } from "~/simulation/stores/simulation";
 import { NodeType } from "~/simulation/types/nodeType";
+import { getNodesByType } from "@/simulation/utils/nodes-by-type";
+import { useNodeLabel } from "@/simulation/composables/node/node-label";
 
 export function useNodeSelect() {
   const circuitStore = useSimulationStore();
+  const { generateNodeLabel } = useNodeLabel();
   const nodesOriginalColors = new Map<string, string>();
 
   const connDetect = computed(() => circuitStore.isConnDetection);
@@ -26,12 +29,10 @@ export function useNodeSelect() {
     const targetType = node.type === NodeType.IN ? NodeType.OUT : NodeType.IN;
 
     // Filtra os nós que não correspondem à lógica de entrada/saída
-    const nodeFiltered = circuitStore
-      .getNodesByType(targetType)
-      .filter(
-        ({ inputs, outputs }) =>
-          outputs[0] !== node.inputs[0] || inputs[0] !== node.outputs[0]
-      );
+    const nodeFiltered = getNodesByType(targetType).filter(
+      ({ inputs, outputs }) =>
+        outputs[0] !== node.inputs[0] || inputs[0] !== node.outputs[0]
+    );
 
     // Salva as cores originais e altera para "blue" em um único loop
     nodeFiltered.forEach((node) => {
@@ -75,7 +76,7 @@ export function useNodeSelect() {
       if (mainNode.type === NodeType.NOT && mainNode.inputs[0]) {
         const inputNode = circuitStore.getNode(mainNode.inputs[0]);
         if (inputNode) {
-          node.label = circuitStore.generateNodeLabel(
+          node.label = generateNodeLabel(
             [inputNode.label ?? ""],
             mainNode.type
           );
@@ -92,7 +93,7 @@ export function useNodeSelect() {
         const inputNode1 = circuitStore.getNode(mainNode.inputs[0]);
         const inputNode2 = circuitStore.getNode(mainNode.inputs[1]);
         if (inputNode1 && inputNode2) {
-          node.label = circuitStore.generateNodeLabel(
+          node.label = generateNodeLabel(
             [inputNode1.label ?? "", inputNode2.label ?? ""],
             mainNode.type
           );
@@ -101,12 +102,12 @@ export function useNodeSelect() {
     };
 
     // Atualiza os nós de tipo 'CONN' (conexão)
-    const nodes = circuitStore.getNodesByType(NodeType.CONN);
+    const nodes = getNodesByType(NodeType.CONN);
     const reversedNodes = [...nodes].reverse();
     reversedNodes.forEach(updateNodeLabel);
 
     // Atualiza os nós de tipo 'OUT' (saída)
-    const nodesIn = circuitStore.getNodesByType(NodeType.OUT);
+    const nodesIn = getNodesByType(NodeType.OUT);
     const reversedNodesIn = [...nodesIn].reverse();
     reversedNodesIn.forEach((node) => {
       if (node.role === "COMPONENT") {

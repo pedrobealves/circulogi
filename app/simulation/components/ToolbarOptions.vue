@@ -27,7 +27,6 @@ const selectedAction = computed(() => circuitStore.selectedAction as Actions);
 const selectAction = (label: Actions) => {
   if (selectedAction.value !== label) {
     circuitStore.setSelectedAction(label);
-    console.log(items.find((item) => item.label === selectedAction.value));
     document.documentElement.style.setProperty(
       "--custom-cursor",
       `url("${

@@ -32,11 +32,20 @@ const usedLogged = useSupabaseUser();
 const verifiedEmails = ref([usedLogged.value?.email]);
 
 const user = {
+  username: usedLogged.value?.user_metadata.name,
   email: usedLogged.value?.email,
 };
 
 const profileFormSchema = toTypedSchema(
   z.object({
+    username: z
+      .string()
+      .min(2, {
+        message: "Username must be at least 2 characters.",
+      })
+      .max(30, {
+        message: "Username must not be longer than 30 characters.",
+      }),
     email: z
       .string({
         required_error: "Please select an email to display.",
@@ -48,19 +57,24 @@ const profileFormSchema = toTypedSchema(
 const { handleSubmit, resetForm } = useForm({
   validationSchema: profileFormSchema,
   initialValues: {
+    username: user.username, // Nome atual
     email: user.email, // Email atual
   },
 });
 
-const onSubmit = handleSubmit((values) => {
-  toast({
-    title: "You submitted the following values:",
-    description: h(
-      "pre",
-      { class: "mt-2 w-[340px] rounded-md bg-slate-950 p-4" },
-      h("code", { class: "text-white" }, JSON.stringify(values, null, 2))
-    ),
-  });
+const onSubmit = handleSubmit(async (values) => {
+  try {
+    const response = await $fetch(`/api/v1/users`, {
+      method: "PUT",
+      body: JSON.stringify(values),
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar perfil:", error);
+  } finally {
+    toast({
+      title: "Perfil atualizado com sucesso!",
+    });
+  }
 });
 </script>
 
@@ -73,6 +87,20 @@ const onSubmit = handleSubmit((values) => {
   </div>
   <Separator />
   <form class="space-y-8" @submit="onSubmit">
+    <FormField v-slot="{ componentField }" name="username">
+      <FormItem>
+        <FormLabel>Name</FormLabel>
+        <FormControl>
+          <Input type="text" placeholder="shadcn" v-bind="componentField" />
+        </FormControl>
+        <FormDescription>
+          This is your public display name. It can be your real name or a
+          pseudonym.
+        </FormDescription>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
     <FormField v-slot="{ componentField }" name="email">
       <FormItem>
         <FormLabel>Email</FormLabel>

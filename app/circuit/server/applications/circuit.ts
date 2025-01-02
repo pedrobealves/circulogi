@@ -172,7 +172,7 @@ export const uploadImage = async (event: H3Event) => {
     }
 
     const file = body.file;
-    const filePath = `${body.path}/${body.name}.png`;
+    const filePath = `${body.path}/${body.user}/${body.name}.png`;
 
     // Cria um Blob a partir do buffer de dados
     const blob = new Blob([file.data], { type: file.type });

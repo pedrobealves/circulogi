@@ -3,9 +3,11 @@ import type { Node } from "~/simulation/types/node";
 import type { Edge } from "~/simulation/types/edge";
 import { NodeType } from "~/simulation/types/nodeType";
 import { NodeRole } from "~/simulation/types/nodeRole";
-import { useNodeFactory } from "./node-factory";
-import { useEdgeFactory } from "./edge-factory";
+import { useNodeFactory } from "../node/node-factory";
+import { useEdgeFactory } from "../edge/edge-factory";
 import { useSimulationStore } from "~/simulation/stores/simulation";
+import { useClock } from "../events/event-clock";
+import { useNodeLabel } from "../node/node-label";
 
 interface ComponentResult {
   mainNode: Node;
@@ -21,7 +23,7 @@ interface ComponentConfig {
 export function useComponentFactory() {
   const nodeFactory = useNodeFactory();
   const { createEdge } = useEdgeFactory();
-  const circuitStore = useSimulationStore();
+  const { generateNodeLabel, generateLabel } = useNodeLabel();
 
   const componentFactoryMap: Record<NodeType, () => ComponentResult> = {
     [NodeType.AND]: () => createDefaultComponent({ type: NodeType.AND }),
@@ -93,7 +95,7 @@ export function useComponentFactory() {
         type: NodeType.IN,
         role: NodeRole.COMPONENT,
       });
-      inputNode.label = inputNode.alias = circuitStore.generateLabel();
+      inputNode.label = inputNode.alias = generateLabel();
       return inputNode;
     });
 
@@ -102,7 +104,7 @@ export function useComponentFactory() {
       role: NodeRole.COMPONENT,
     });
 
-    outputNode.label = circuitStore.generateNodeLabel(
+    outputNode.label = generateNodeLabel(
       inputNodes.map((node) => node.label ?? ""),
       type
     );
@@ -147,7 +149,7 @@ export function useComponentFactory() {
       alias: "CLK",
     });
 
-    inputDT.label = type + "_" + circuitStore.generateLabel();
+    inputDT.label = type + "_" + generateLabel();
     inputCLK.label = inputCLK.alias = "CLK";
 
     return [inputDT, inputCLK];
@@ -171,8 +173,8 @@ export function useComponentFactory() {
     });
 
     inputCLK.label = "CLK";
-    input1.label = type.charAt(0) + "_" + circuitStore.generateLabel();
-    input2.label = type.charAt(1) + "_" + circuitStore.generateLabel();
+    input1.label = type.charAt(0) + "_" + generateLabel();
+    input2.label = type.charAt(1) + "_" + generateLabel();
 
     return [inputCLK, input1, input2];
   }
@@ -197,11 +199,8 @@ export function useComponentFactory() {
       alias: "Q",
     });
 
-    outputQ.label = "Q_" + circuitStore.generateLabel();
-    outputNotQ.label = circuitStore.generateNodeLabel(
-      [outputQ.label],
-      NodeType.NOT
-    );
+    outputQ.label = "Q_" + generateLabel();
+    outputNotQ.label = generateNodeLabel([outputQ.label], NodeType.NOT);
 
     return [outputQ, outputNotQ];
   }
@@ -214,7 +213,7 @@ export function useComponentFactory() {
     });
 
     if (type === NodeType.CLK) {
-      circuitStore.addClkNode(mainNode);
+      useClock().addClkNode(mainNode);
     }
 
     const outNode = nodeFactory.createNode({
@@ -261,11 +260,8 @@ export function useComponentFactory() {
       role: NodeRole.COMPONENT,
     });
 
-    inNode.label = circuitStore.generateLabel();
-    outNode.label = circuitStore.generateNodeLabel(
-      [inNode.label],
-      NodeType.NOT
-    );
+    inNode.label = generateLabel();
+    outNode.label = generateNodeLabel([inNode.label], NodeType.NOT);
 
     const edges = setupNodeConnections(mainNode, [inNode], [outNode]);
     return { mainNode, nodes: [inNode, outNode], edges };

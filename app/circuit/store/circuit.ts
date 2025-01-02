@@ -28,7 +28,7 @@ export const useCircuitStore = defineStore("circuit", () => {
     return circuits.value.find((c) => c.id === circuitId);
   }
 
-  const lastCircuits = computed<Circuit[]>(() => circuits.value.slice(0, 16));
+  const lastCircuits = computed<Circuit[]>(() => circuits.value?.slice(0, 16));
 
   function $reset() {
     circuits.value = [];

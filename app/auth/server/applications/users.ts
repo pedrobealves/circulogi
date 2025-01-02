@@ -5,6 +5,11 @@ import {
   serverSupabaseServiceRole,
 } from "#supabase/server";
 
+type User = {
+  username: string;
+  email: string;
+};
+
 export const deleteUser = async (event: H3Event): Promise<string> => {
   await authMiddleware(event);
 
@@ -43,4 +48,33 @@ export const deleteUser = async (event: H3Event): Promise<string> => {
   console.log("data", data);
 
   return "Usuário deletado com sucesso";
+};
+
+export const update = async (event: H3Event): Promise<string> => {
+  await authMiddleware(event);
+
+  const body = await readBody<User>(event);
+
+  console.log("body", body);
+
+  const client = await serverSupabaseClient(event);
+
+  const { data, error } = await client.auth.updateUser({
+    data: {
+      name: body.username,
+    },
+  });
+
+  if (error) {
+    throw createError({
+      status: 400,
+      message: "Erro ao editar usuário",
+      statusMessage: "Erro ao editar usuário",
+      data: {
+        message: error.message,
+      },
+    });
+  }
+
+  return "Usuário editado com sucesso";
 };
