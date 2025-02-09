@@ -41,8 +41,8 @@ export default defineNuxtConfig({
   },
   content: {
     database: {
-      type: "postgres",
-      url: process.env.DATABASE_URL,
+      type: "sqlite",
+      filename: "/tmp/contents.sqlite",
     },
   },
 });
