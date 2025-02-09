@@ -52,7 +52,7 @@ const details = [
     visible: false,
     items: logics,
   },
-  { visible: false, items: [{ title: "NOTE", img: "" }] },
+  { visible: false, items: [{ title: "TEXT", img: "" }] },
 ];
 
 const container = ref(null);
@@ -134,10 +134,10 @@ const onMouseLeaveContainer = () => {
 const isDialogOpen = ref(false);
 
 function addNewComponent(type: string) {
-  if (type === "NOTE") {
+  if (type === "TEXT") {
     isDialogOpen.value = true;
     console.log(isDialogOpen.value);
-    return; // Evitar criar o componente diretamente
+    return;
   }
   circuitStore.createComponentAndAdd(type as NodeType);
 }

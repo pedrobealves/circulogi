@@ -7,9 +7,7 @@ export function useComponentNote() {
   function openNote(nodeId: string) {
     const node = circuitStore.getNode(nodeId);
 
-    if (node?.type !== NodeType.NOTE) return;
-
-    console.log(node.value);
+    if (node?.type !== NodeType.TEXT) return;
 
     if (node.value) {
       node.color = "transparent";

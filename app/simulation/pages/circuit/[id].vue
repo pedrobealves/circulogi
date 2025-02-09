@@ -9,6 +9,7 @@ import { useClock } from "~/simulation/composables/events/event-clock";
 import { isComponent } from "~/simulation/utils/is-component";
 import { useSaveThumbnail } from "@/simulation/composables/events/event-save-thumbnail";
 import { useNodeStyle } from "@/simulation/composables/node/node-style";
+import Properties from "~/simulation/components/Properties.vue";
 
 const circuitStore = useSimulationStore();
 const { uploadThumbnail } = useSaveThumbnail();
@@ -99,6 +100,7 @@ useSeoMeta({
     <Tutorial />
     <TopBarContainer />
     <Share />
+    <Properties />
   </div>
 </template>
 

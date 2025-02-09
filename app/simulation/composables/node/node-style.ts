@@ -25,7 +25,7 @@ export function useNodeStyle() {
 
     if (!node) return "black";
 
-    if (node.type === NodeType.NOTE) return "transparent";
+    if (node.type === NodeType.TEXT) return "transparent";
 
     return isComponent(node) ? "black" : node.color;
   });
@@ -47,7 +47,7 @@ export function useNodeStyle() {
     const node = circuitStore.getNode(nodeId);
 
     if (!node) return "";
-    if (node.type === NodeType.NOTE) return node.note;
+    if (node.type === NodeType.TEXT) return node.configurations?.INPUT_TEXT;
 
     return isComponent(node) ? node.type : "";
   });

@@ -14,10 +14,7 @@ export interface Node extends vNG.Node {
   role: NodeRole; // INPUT, OUTPUT, etc.
   inputs: string[]; // IDs dos nós de entrada
   outputs: string[]; // IDs dos nós de saída
-  maxInputs?: number; // Número máximo de entradas permitidas
-  maxOutputs?: number; // Número máximo de saídas permitidas
   value: number | null;
-  note?: string;
-  delay?: number;
   inverted?: boolean;
+  configurations?: any;
 }

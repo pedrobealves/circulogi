@@ -11,9 +11,26 @@ export const typeConditions = [
   NodeType.CLK,
 ];
 
+export const typeConditionsProperties = [
+  NodeType.IN,
+  NodeType.OUT,
+  NodeType.CONN,
+  NodeType.JK,
+  NodeType.D,
+  NodeType.T,
+  NodeType.SR,
+];
+
 export function isComponent(node: Node): boolean {
   return (
     !roleConditions.includes(node.role as NodeRole) &&
     !typeConditions.includes(node.type as NodeType)
+  );
+}
+
+export function showProperties(node: Node): boolean {
+  return (
+    !typeConditionsProperties.includes(node.type as NodeType) ||
+    node.role === NodeRole.INPUT
   );
 }

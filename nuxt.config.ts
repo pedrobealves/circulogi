@@ -28,6 +28,7 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "@nuxt/image",
     "nuxt-time",
+    "@nuxt/content",
   ],
   i18n: {
     lazy: false,

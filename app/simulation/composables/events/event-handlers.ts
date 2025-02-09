@@ -10,8 +10,12 @@ export function useNodeEventHandlers() {
   const { solve } = useLogicPropagation();
   const { save } = useSaveState();
   const { handleNodeCollision } = useNodeCollision();
-  const { selectNode, nodesConnDeHighlight, nodesConnHighlight } =
-    useNodeSelect();
+  const {
+    selectNode,
+    deselectNodes,
+    nodesConnDeHighlight,
+    nodesConnHighlight,
+  } = useNodeSelect();
 
   function throttle<T extends (...args: any[]) => void>(
     func: T,
@@ -50,6 +54,9 @@ export function useNodeEventHandlers() {
     },
     "node:pointermove": (node) => {
       throttledHandleNodeCollision(node); // Lida com colisões de forma otimizada
+    },
+    "view:click": () => {
+      deselectNodes();
     },
   };
 

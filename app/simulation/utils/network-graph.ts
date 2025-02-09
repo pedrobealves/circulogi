@@ -49,6 +49,7 @@ export function useNetworkGraph() {
           margin: 6,
           direction: "south",
           text: "label",
+          directionAutoAdjustment: true,
         },
         hover: {
           radius: calculateNodeRadius,

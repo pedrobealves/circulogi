@@ -14,6 +14,10 @@ export function useNodeSelect() {
     circuitStore.selectNode(nodeId);
   }
 
+  function deselectNodes() {
+    circuitStore.deselectNodes();
+  }
+
   function nodesConnHighlight(nodeId: string) {
     const node = circuitStore.getNode(nodeId);
 
@@ -128,5 +132,10 @@ export function useNodeSelect() {
     { immediate: false }
   );
 
-  return { selectNode, nodesConnHighlight, nodesConnDeHighlight };
+  return {
+    selectNode,
+    nodesConnHighlight,
+    deselectNodes,
+    nodesConnDeHighlight,
+  };
 }

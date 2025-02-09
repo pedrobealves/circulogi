@@ -22,7 +22,7 @@ export function useNodeLabel() {
     [NodeType.OUT]: "",
     [NodeType.CONN]: "",
     [NodeType.CLK]: "",
-    [NodeType.NOTE]: "",
+    [NodeType.TEXT]: "",
   };
 
   function generateNodeLabel(inputs: string[], type: NodeType): string {

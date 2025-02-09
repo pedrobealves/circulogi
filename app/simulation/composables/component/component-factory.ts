@@ -43,7 +43,7 @@ export function useComponentFactory() {
     [NodeType.CONN]: function (): ComponentResult {
       throw new Error("Function not implemented.");
     },
-    [NodeType.NOTE]: function (): ComponentResult {
+    [NodeType.TEXT]: function (): ComponentResult {
       throw new Error("Function not implemented.");
     },
   };
@@ -89,6 +89,8 @@ export function useComponentFactory() {
       maxInputs: 2,
       maxOutputs: 1,
     });
+
+    mainNode.configurations.INPUT_NUMBER = 2;
 
     const inputNodes = Array.from({ length: inputCount }, () => {
       const inputNode = nodeFactory.createNode({
@@ -150,6 +152,7 @@ export function useComponentFactory() {
     });
 
     inputDT.label = type + "_" + generateLabel();
+    inputDT.alias = "D";
     inputCLK.label = inputCLK.alias = "CLK";
 
     return [inputDT, inputCLK];
@@ -174,7 +177,9 @@ export function useComponentFactory() {
 
     inputCLK.label = "CLK";
     input1.label = type.charAt(0) + "_" + generateLabel();
+    input1.alias = type.charAt(0);
     input2.label = type.charAt(1) + "_" + generateLabel();
+    input2.alias = type.charAt(1);
 
     return [inputCLK, input1, input2];
   }
@@ -213,8 +218,11 @@ export function useComponentFactory() {
     });
 
     if (type === NodeType.CLK) {
+      mainNode.configurations.CLOCK_NUMBER = 500;
       useClock().addClkNode(mainNode);
     }
+
+    mainNode.configurations.OUTPUT_NUMBER = 1;
 
     const outNode = nodeFactory.createNode({
       type: NodeType.OUT,
@@ -267,5 +275,5 @@ export function useComponentFactory() {
     return { mainNode, nodes: [inNode, outNode], edges };
   }
 
-  return { createComponent };
+  return { createComponent, connectNodes };
 }

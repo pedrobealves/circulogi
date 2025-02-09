@@ -33,5 +33,46 @@ export function useNodeDelete() {
     console.log("Nó deletado com sucesso");
   }
 
-  return { deleteNode };
+  function deleteInNode(nodeId: string) {
+    const node = circuitStore.getNode(nodeId);
+
+    if (!node) return false;
+
+    for (const input of node.inputs) {
+      const inputNode = circuitStore.getNode(input);
+      if (inputNode?.inputs.length === 0) {
+        circuitStore.removeNode(inputNode.id);
+        circuitStore.removeEdge(inputNode.id, node.id);
+
+        node.inputs = node.inputs.filter((id) => id !== inputNode.id);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function deleteOutNode(nodeId: string) {
+    const node = circuitStore.getNode(nodeId);
+
+    if (!node) return false;
+
+    for (const output of node.outputs) {
+      const outputNode = circuitStore.getNode(output);
+
+      if (outputNode?.outputs.length === 0) {
+        circuitStore.removeNode(outputNode.id);
+        circuitStore.removeEdge(node.id, outputNode.id);
+
+        node.outputs = node.outputs.filter((id) => id !== outputNode.id);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  return { deleteNode, deleteInNode, deleteOutNode };
 }

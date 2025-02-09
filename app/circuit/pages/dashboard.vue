@@ -13,6 +13,33 @@ import { Separator } from "@/common/components/ui/separator";
 import { SidebarTrigger } from "@/common/components/ui/sidebar";
 
 import {
+  AudioWaveform,
+  BadgeCheck,
+  Bell,
+  BookOpen,
+  Bot,
+  ChevronRight,
+  ChevronsUpDown,
+  Command,
+  CreditCard,
+  Folder,
+  Forward,
+  Frame,
+  GalleryVerticalEnd,
+  LogOut,
+  Map,
+  MoreHorizontal,
+  PieChart,
+  Plus,
+  Settings2,
+  Sparkles,
+  SquareTerminal,
+  Trash2,
+  EllipsisVertical,
+  Circle,
+} from "lucide-vue-next";
+
+import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
@@ -151,14 +178,14 @@ useSeoMeta({
         :key="circuit.id"
       >
         <ContextMenuTrigger
-          class="group aspect-video rounded-xl bg-gray-100 overflow-clip p-[6px] cursor-pointer"
+          class="group aspect-video rounded-xl bg-sidebar-accent overflow-clip p-[6px] cursor-pointer"
         >
           <NuxtLink
             :to="{ name: 'circuit-id', params: { id: circuit.id } }"
             replace
           >
             <div
-              class="w-full h-44 bg-gray-300 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out overflow-hidden"
+              class="w-full h-44 bg-neutral-200 rounded-xl ring-offset-2 ring-black group-hover:ring-4 transition ease-out overflow-hidden"
             >
               <NuxtImg
                 v-if="circuit.thumbnail"

@@ -10,27 +10,26 @@ import { useNodesStore } from "./node";
 import { useEdgesStore } from "./edge";
 
 import { useComponentFactory } from "~/simulation/composables/component/component-factory";
-import { useLogicPropagation } from "../composables/events/event-logic-propagation";
 import { defineStore } from "pinia";
+import type { ClockNode } from "../types/clock";
 
 export const useSimulationStore = defineStore("simulation", () => {
   const circuit = ref<Circuit>();
 
   const nodesStore = useNodesStore();
   const edgesStore = useEdgesStore();
-  const { createNode } = useNodeFactory();
-  const { createEdge } = useEdgeFactory();
   const { createComponent } = useComponentFactory();
   const autoSave = ref(false);
   const graph = ref<vNG.Instance>();
   const isConnDetection = ref(false);
+  const selectedNodes = ref<Node>();
 
   const selectedAction = ref<Actions>();
 
   const counter = ref(0);
   const layout = nodesStore.layouts;
 
-  const clkNodes = ref<Node[]>([]);
+  const clkNodes = ref<ClockNode[]>([]);
   const actClk = ref<boolean>(false);
 
   function setGraph(graphInstance: any) {
@@ -42,24 +41,12 @@ export const useSimulationStore = defineStore("simulation", () => {
     edgesStore.$reset();
     autoSave.value = false;
     selectedAction.value = undefined;
+    selectedNodes.value = undefined;
     circuit.value = undefined;
     counter.value = 0;
     layout.nodes = {};
     clkNodes.value = [];
   }
-
-  const graphState = computed(() => ({
-    nodes: nodesStore.nodes,
-    edges: edgesStore.edges,
-  }));
-
-  // watch(
-  //   graphState,
-  //   () => {
-  //     if (autoSave.value) save();
-  //   },
-  //   { deep: true }
-  // );
 
   async function save() {
     try {
@@ -114,10 +101,8 @@ export const useSimulationStore = defineStore("simulation", () => {
       value !== NodeType.OUT &&
       value !== NodeType.CONN &&
       value !== NodeType.CLK &&
-      value !== NodeType.NOTE
+      value !== NodeType.TEXT
   );
-
-  const selectedNodes = ref<Node>();
 
   function loadCircuit(content: any) {
     if (!content) return;
@@ -143,13 +128,13 @@ export const useSimulationStore = defineStore("simulation", () => {
 
   function createNoteNode(text: string) {
     const component = useNodeFactory().createNode({
-      type: NodeType.NOTE,
+      type: NodeType.TEXT,
       role: NodeRole.COMPONENT,
       size: 32,
       maxInputs: 0,
       maxOutputs: 0,
     });
-    component.note = text;
+    component.configurations.INPUT_TEXT = text;
     nodesStore.addNode(component);
     save();
   }
@@ -159,16 +144,24 @@ export const useSimulationStore = defineStore("simulation", () => {
     selectedNodes.value = node;
   }
 
+  function deselectNodes() {
+    selectedNodes.value = undefined;
+  }
+
   return {
     circuit,
     save,
     createComponentAndAdd,
     nodes: nodesStore.nodes,
     getNode: nodesStore.getNode,
+    removeNode: nodesStore.removeNode,
+    removeEdge: edgesStore.removeEdge,
     edges: edgesStore.edges,
+    addEdge: edgesStore.addEdge,
     addNode: nodesStore.addNode,
     layout,
     selectNode,
+    deselectNodes,
     selectedNodes,
     isConnDetection,
     logicTypes,
