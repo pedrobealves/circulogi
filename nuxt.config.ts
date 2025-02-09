@@ -39,4 +39,10 @@ export default defineNuxtConfig({
     },
     strategy: "no_prefix",
   },
+  content: {
+    database: {
+      type: "postgres",
+      url: process.env.DATABASE_URL,
+    },
+  },
 });
