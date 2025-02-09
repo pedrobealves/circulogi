@@ -1,0 +1,14 @@
+{
+  "type": "TEXT",
+  "category": "MISC",
+  "description": "Text input",
+  "properties": [
+    {
+      "name": "INPUT_TEXT",
+      "type": "TEXT",
+      "label": "Text Input",
+      "min": 2,
+      "max": 80
+    }
+  ]
+}

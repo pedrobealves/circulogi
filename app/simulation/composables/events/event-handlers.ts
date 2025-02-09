@@ -1,17 +1,21 @@
 import * as vNG from "v-network-graph";
-import { useNodeCollision } from "./events/node-collision";
-import { useNodeSelect } from "./events/node-select";
-import { useLogicPropagation } from "./events/logic-propagation";
-import { useActionsNode } from "./events/actions-node";
-import { useSaveState } from "./events/save-state";
+import { useNodeCollision } from "./event-node-collision";
+import { useNodeSelect } from "./event-node-select";
+import { useLogicPropagation } from "./event-logic-propagation";
+import { useActionsNode } from "./event-actions-node";
+import { useSaveState } from "./event-save-state";
 // Função para otimizar o registro de manipuladores de eventos
 export function useNodeEventHandlers() {
   // Inicialize dependências fora dos manipuladores para evitar recriação repetitiva
   const { solve } = useLogicPropagation();
   const { save } = useSaveState();
   const { handleNodeCollision } = useNodeCollision();
-  const { selectNode, nodesConnDeHighlight, nodesConnHighlight } =
-    useNodeSelect();
+  const {
+    selectNode,
+    deselectNodes,
+    nodesConnDeHighlight,
+    nodesConnHighlight,
+  } = useNodeSelect();
 
   function throttle<T extends (...args: any[]) => void>(
     func: T,
@@ -28,7 +32,7 @@ export function useNodeEventHandlers() {
     } as T;
   }
 
-  const { executeAction, openNote } = useActionsNode();
+  const { executeAction } = useActionsNode();
 
   // Usa o throttle do Lodash para limitar a frequência do evento
   const throttledHandleNodeCollision = throttle((node) => {
@@ -50,6 +54,9 @@ export function useNodeEventHandlers() {
     },
     "node:pointermove": (node) => {
       throttledHandleNodeCollision(node); // Lida com colisões de forma otimizada
+    },
+    "view:click": () => {
+      deselectNodes();
     },
   };
 

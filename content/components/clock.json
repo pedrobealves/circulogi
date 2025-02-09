@@ -1,0 +1,16 @@
+{
+  "type": "CLK",
+  "category": "IO",
+  "description": "Clock",
+  "properties": [
+    {
+      "name": "CLOCK_NUMBER",
+      "type": "NUMBER",
+      "label": "Clock Time(ms)",
+      "default": 500,
+      "min": 50,
+      "max": 9999999999,
+      "step": 10
+    }
+  ]
+}

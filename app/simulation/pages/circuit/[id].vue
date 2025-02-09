@@ -1,63 +1,23 @@
 <script setup lang="ts">
 import { useSimulationStore } from "@/simulation/stores/simulation";
 import { NodeType } from "~/simulation/types/nodeType";
-import { useNetworkGraph } from "~/simulation/composables/network-graph";
-import { useNodeEventHandlers } from "~/simulation/composables/node-event-handlers";
+import { useNetworkGraph } from "~/simulation/utils/network-graph";
+import { useNodeEventHandlers } from "~/simulation/composables/events/event-handlers";
 import { NodeRole } from "@/simulation/types/nodeRole";
 import ToolbarOptions from "@/simulation/components/ToolbarOptions.vue";
+import { useClock } from "~/simulation/composables/events/event-clock";
+import { isComponent } from "~/simulation/utils/is-component";
+import { useSaveThumbnail } from "@/simulation/composables/events/event-save-thumbnail";
+import { useNodeStyle } from "@/simulation/composables/node/node-style";
+import Properties from "~/simulation/components/Properties.vue";
 
 const circuitStore = useSimulationStore();
+const { uploadThumbnail } = useSaveThumbnail();
+const { getFillColor, getStrokeColor, getRadius, showType } = useNodeStyle();
 
 const { configs } = useNetworkGraph();
 
 const { eventHandlers } = useNodeEventHandlers();
-
-const getFillColor = computed(() => (nodeId: any) => {
-  const node = circuitStore.getNode(nodeId);
-
-  if (!node) return "transparent";
-
-  const color = {
-    [NodeType.CONN]: node.color,
-    [NodeType.OUT]: node.color,
-    [NodeType.IN]: node.role === NodeRole.INPUT ? node.color : "transparent",
-    [NodeType.CLK]: node.color,
-  } as const;
-
-  return color[node.type as keyof typeof color] || "transparent";
-});
-
-const getStrokeColor = computed(() => (nodeId: any) => {
-  const node = circuitStore.getNode(nodeId);
-
-  if (!node) return "black";
-
-  if (node.type === NodeType.NOTE) return "transparent";
-
-  return circuitStore.isComponent(node) ? "black" : node.color;
-});
-
-const getRadius = computed(() => (radius: number, nodeId: any) => {
-  const node = circuitStore.getNode(nodeId);
-
-  if (!node) return radius;
-
-  const value = {
-    [NodeType.OUT]: radius,
-    [NodeType.IN]: radius - 12,
-  } as const;
-
-  return value[node.type as keyof typeof value] || radius - 4;
-});
-
-const showType = computed(() => (nodeId: any) => {
-  const node = circuitStore.getNode(nodeId);
-
-  if (!node) return "";
-  if (node.type === NodeType.NOTE) return node.note;
-
-  return circuitStore.isComponent(node) ? node.type : "";
-});
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -80,64 +40,14 @@ try {
 
 onMounted(() => {
   circuitStore.loadCircuit(circuitStore.circuit?.content);
-  circuitStore.startClock();
+  useClock().startClock();
 
   circuitStore.setGraph(graph);
 
   setTimeout(() => {
-    uploadCover();
+    uploadThumbnail();
   }, 3000);
 });
-
-async function uploadCover() {
-  if (!graph.value) return;
-  const svgText = await graph.value.exportAsSvgText();
-
-  // Criar um elemento <img> temporário para carregar o SVG
-  const svgImage = new Image();
-  const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
-  const svgUrl = URL.createObjectURL(svgBlob);
-  svgImage.src = svgUrl;
-
-  // Quando a imagem estiver carregada, desenhá-la no canvas e exportar como PNG
-  svgImage.onload = () => {
-    // Criar o canvas e desenhar a imagem
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = svgImage.width;
-    canvas.height = svgImage.height;
-
-    if (ctx) {
-      ctx.drawImage(svgImage, 0, 0, svgImage.width, svgImage.height);
-
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const formData = new FormData();
-          formData.append("file", blob);
-          formData.append("name", circuitStore.circuit?.id || "");
-          formData.append("path", "circuits");
-
-          try {
-            const response = await $fetch("/api/v1/circuits/image", {
-              method: "POST",
-              body: formData,
-            });
-
-            await $fetch(`/api/v1/circuits/${circuitStore.circuit?.id}`, {
-              method: "PUT",
-              body: {
-                thumbnail: response.url,
-              },
-            });
-          } catch (err) {
-          } finally {
-            URL.revokeObjectURL(svgUrl);
-          }
-        }
-      }, "image/png");
-    }
-  };
-}
 
 const graph = ref<any>();
 
@@ -190,6 +100,7 @@ useSeoMeta({
     <Tutorial />
     <TopBarContainer />
     <Share />
+    <Properties />
   </div>
 </template>
 

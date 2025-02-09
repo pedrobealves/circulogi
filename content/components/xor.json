@@ -1,0 +1,16 @@
+{
+  "type": "XOR",
+  "category": "GATE",
+  "description": "Logical XOR operation",
+  "properties": [
+    {
+      "name": "INPUT_NUMBER",
+      "type": "NUMBER",
+      "label": "Entradas",
+      "default": 2,
+      "min": 2,
+      "max": 8,
+      "step": 1
+    }
+  ]
+}

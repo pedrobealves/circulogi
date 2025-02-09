@@ -48,7 +48,7 @@ async function deleteUser() {
         <div
           class="space-y-2 flex flex-row items-center justify-between rounded-lg border p-4"
         >
-          <div class="space-y-0.5">
+          <div class="space-y-0.5 mr-4">
             <label
               for="radix-v-280-form-item"
               class="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-base"

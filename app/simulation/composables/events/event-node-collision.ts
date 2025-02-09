@@ -2,7 +2,7 @@ import * as vNG from "v-network-graph";
 import { useSimulationStore } from "@/simulation/stores/simulation";
 import type { Node } from "~/simulation/types/node";
 import { computed, ref, watch } from "vue";
-
+import { useConnectionNodes } from "@/simulation/composables/node/node-connection";
 // Types and interfaces
 interface NodePosition {
   x?: number;
@@ -28,6 +28,8 @@ interface CollisionConfig {
 export function useNodeCollision() {
   // Store initialization
   const circuitStore = useSimulationStore();
+  const { connectionNodes } = useConnectionNodes();
+
   const nodes = circuitStore.nodes;
 
   // Computed properties
@@ -150,7 +152,7 @@ export function useNodeCollision() {
     const targetNode = nodes[collidingNodeId];
 
     if (sourceNode && targetNode) {
-      circuitStore.connectionNodes(sourceNode, targetNode);
+      connectionNodes(sourceNode, targetNode);
     }
   };
 

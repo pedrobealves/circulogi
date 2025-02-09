@@ -14,5 +14,5 @@ export enum NodeType {
   T = "T",
   SR = "SR",
   JK = "JK",
-  NOTE = "NOTE",
+  TEXT = "TEXT",
 }

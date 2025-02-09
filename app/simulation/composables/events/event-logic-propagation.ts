@@ -119,6 +119,8 @@ export function useLogicPropagation() {
     const queue: string[] = [startNodeId];
     const processedNodes: string[] = [];
 
+    console.log("Processing node", queue);
+
     while (queue.length > 0) {
       const currentNodeId = queue.shift()!;
       const currentNode = nodes[currentNodeId];
@@ -153,6 +155,7 @@ export function useLogicPropagation() {
       if (currentNode.value !== null) {
         updateNodeValue(currentNode, currentNode.value);
       }
+
       queue.push(...currentNode.outputs);
     }
   };
@@ -173,17 +176,17 @@ export function useLogicPropagation() {
     const userValue = Number(!inputNode.value);
     updateNodeValue(inputNode, userValue);
 
-    const outputNodeId = inputNode.outputs[0];
-    if (!outputNodeId || !circuitStore.nodes[outputNodeId]) {
-      console.log("Invalid output node");
-      return;
-    }
+    // Propagar para TODOS os outputs, não apenas o primeiro
+    inputNode.outputs.forEach((outputNodeId) => {
+      if (outputNodeId && circuitStore.nodes[outputNodeId]) {
+        propagateLogic(
+          circuitStore.nodes[outputNodeId].id,
+          inputNode,
+          circuitStore.nodes
+        );
+      }
+    });
 
-    propagateLogic(
-      circuitStore.nodes[outputNodeId].id,
-      inputNode,
-      circuitStore.nodes
-    );
     updateEdgeColors();
   }
 

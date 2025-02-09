@@ -10,6 +10,8 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@libsql/client": "*",
+    "@nuxt/content": "3.0.0",
     "@nuxt/image": "1.8.1",
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/i18n": "^9.0.0-rc.2",
@@ -26,6 +28,7 @@
     "nanoid": "^5.0.8",
     "nuxt": "^3.14.1592",
     "nuxt-time": "1.0.3",
+    "pg": "*",
     "pinia": "^2.2.7",
     "project-name-generator": "^2.1.9",
     "radix-vue": "^1.9.10",

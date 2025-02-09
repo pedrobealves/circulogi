@@ -46,8 +46,6 @@ export function useNodeFactory() {
       type,
       role,
       size = NODE_DEFAULTS.size,
-      maxInputs = NODE_DEFAULTS.maxInputs,
-      maxOutputs = NODE_DEFAULTS.maxOutputs,
       inverted = NODE_DEFAULTS.inverted,
     } = config;
 
@@ -59,11 +57,10 @@ export function useNodeFactory() {
       inputs: [],
       outputs: [],
       delay: NODE_DEFAULTS.delay,
-      maxInputs,
-      maxOutputs,
       value: NODE_DEFAULTS.value,
       size,
       color: NODE_DEFAULTS.color,
+      configurations: {},
       inverted,
     };
   }
