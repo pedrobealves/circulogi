@@ -12,14 +12,12 @@ const componentHandlers: Record<string, ComponentHandler> = {
       const store = useSimulationStore();
       if (store.selectedNodes && store.selectedNodes.configurations) {
         if (store.selectedNodes.configurations.INPUT_NUMBER < value) {
-          console.log("add");
           useNodeAdd().addInputNode(store.selectedNodes.id);
         } else {
           const checkNode = useNodeDelete().deleteInNode(
             store.selectedNodes.id
           );
           if (!checkNode) return false;
-          console.log("remove");
         }
 
         store.selectedNodes.configurations.INPUT_NUMBER = value;
@@ -33,13 +31,11 @@ const componentHandlers: Record<string, ComponentHandler> = {
       if (store.selectedNodes && store.selectedNodes.configurations) {
         if (store.selectedNodes.configurations.OUTPUT_NUMBER < value) {
           useNodeAdd().addOutputNode(store.selectedNodes.id);
-          console.log("add");
         } else {
           const checkNode = useNodeDelete().deleteOutNode(
             store.selectedNodes.id
           );
           if (!checkNode) return false;
-          console.log("remove");
         }
 
         store.selectedNodes.configurations.OUTPUT_NUMBER = value;

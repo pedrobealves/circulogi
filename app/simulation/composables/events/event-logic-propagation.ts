@@ -119,8 +119,6 @@ export function useLogicPropagation() {
     const queue: string[] = [startNodeId];
     const processedNodes: string[] = [];
 
-    console.log("Processing node", queue);
-
     while (queue.length > 0) {
       const currentNodeId = queue.shift()!;
       const currentNode = nodes[currentNodeId];
@@ -173,10 +171,8 @@ export function useLogicPropagation() {
     }
 
     // Toggle input node value and update its color
-    if (inputNode.type !== NodeType.CLK) {
-      const userValue = Number(!inputNode.value);
-      updateNodeValue(inputNode, userValue);
-    }
+    const userValue = Number(!inputNode.value);
+    updateNodeValue(inputNode, userValue);
 
     // Propagar para TODOS os outputs, não apenas o primeiro
     inputNode.outputs.forEach((outputNodeId) => {
@@ -218,7 +214,6 @@ export function useLogicPropagation() {
   }
 
   function updateEdgeColors() {
-    console.log("Updating edge colors");
     Object.values(circuitStore.edges).forEach((edge) => {
       const sourceNode = circuitStore.nodes[edge.source];
       const targetNode = circuitStore.nodes[edge.target];
