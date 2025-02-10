@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { useSimulationStore } from "~/simulation/stores/simulation";
-import {useSaveThumbnail} from "@/simulation/composables/events/event-save-thumbnail";
+import { useSaveThumbnail } from "@/simulation/composables/events/event-save-thumbnail";
 const circuitStore = useSimulationStore();
 const circuit = computed(() => circuitStore.circuit);
-const { exportImage } = useSaveThumbnail();
+const { uploadThumbnail } = useSaveThumbnail();
 
 function saveCircuit() {
+  console.log("Saving circuit...");
   circuitStore.save();
 }
-
-
 </script>
 
 <template>
@@ -20,6 +19,6 @@ function saveCircuit() {
     <TopBarDivider />
     <TopBarCircuitInfo :name="circuit?.name" />
     <TopBarDivider />
-    <TopBarActions @save="saveCircuit" @export="exportImage" />
+    <TopBarActions @save="saveCircuit" @export="uploadThumbnail" />
   </div>
 </template>

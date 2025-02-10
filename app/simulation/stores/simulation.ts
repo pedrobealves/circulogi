@@ -72,7 +72,7 @@ export const useSimulationStore = defineStore("simulation", () => {
           body,
         });
 
-        if (response.ok) {
+        if (response === "Circuito editado com sucesso") {
           console.log("Circuito atualizado com sucesso.");
         } else {
           console.error("Erro ao atualizar o circuito: " + response.statusText);

@@ -173,8 +173,10 @@ export function useLogicPropagation() {
     }
 
     // Toggle input node value and update its color
-    const userValue = Number(!inputNode.value);
-    updateNodeValue(inputNode, userValue);
+    if (inputNode.type !== NodeType.CLK) {
+      const userValue = Number(!inputNode.value);
+      updateNodeValue(inputNode, userValue);
+    }
 
     // Propagar para TODOS os outputs, não apenas o primeiro
     inputNode.outputs.forEach((outputNodeId) => {

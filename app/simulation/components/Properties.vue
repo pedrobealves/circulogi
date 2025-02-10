@@ -61,9 +61,8 @@ const componentProperties = ref<any[]>([]);
 
 watchEffect(async () => {
   if (circuitStore.selectedNodes?.type) {
-    componentProperties.value = await getProprieties(
-      circuitStore.selectedNodes.type
-    );
+    componentProperties.value =
+      (await getProprieties(circuitStore.selectedNodes.type)) || [];
   } else {
     componentProperties.value = [];
   }
@@ -87,6 +86,10 @@ const handlePropertyUpdate = (field: any, value: any) => {
     circuitStore.save();
   }
 };
+
+const componentConfigurations = computed(() => {
+  return circuitStore.selectedNodes?.configurations ?? {};
+});
 </script>
 <template>
   <div v-if="isComponentType" class="flex absolute z-[2] top-1/3 right-14">
@@ -141,6 +144,24 @@ const handlePropertyUpdate = (field: any, value: any) => {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <!-- Text input field -->
+              <div v-if="field.type === 'TEXT'" class="flex flex-col gap-2">
+                <Label :for="field.id">{{ field.label }}</Label>
+                <Textarea
+                  :id="field.id"
+                  :placeholder="field.placeholder || ''"
+                  :maxlength="field.max"
+                  :minlength="field.min"
+                  v-model="componentConfigurations[field.name]"
+                  @input="
+    (event: Event) => handlePropertyUpdate(
+      field.name,
+      (event.target as HTMLTextAreaElement).value
+    )
+  "
+                />
               </div>
             </template>
           </div>

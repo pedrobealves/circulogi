@@ -28,7 +28,6 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "@nuxt/image",
     "nuxt-time",
-    "@nuxt/content",
   ],
   i18n: {
     lazy: false,
@@ -38,11 +37,5 @@ export default defineNuxtConfig({
       redirectOn: "root", // recommended
     },
     strategy: "no_prefix",
-  },
-  content: {
-    database: {
-      type: "sqlite",
-      filename: "/tmp/contents.sqlite",
-    },
   },
 });
