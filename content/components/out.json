@@ -1,6 +1,6 @@
 {
   "type": "OUT",
-  "category": "I/O",
+  "category": "IO",
   "description": "Output operation",
   "properties": []
 }

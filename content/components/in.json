@@ -1,6 +1,6 @@
 {
   "type": "IN",
-  "category": "I/O",
+  "category": "IO",
   "description": "Input operation",
   "properties": [
     {

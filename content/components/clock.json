@@ -1,6 +1,6 @@
 {
   "type": "CLK",
-  "category": "IO",
+  "category": "TIMING",
   "description": "Clock",
   "properties": [
     {

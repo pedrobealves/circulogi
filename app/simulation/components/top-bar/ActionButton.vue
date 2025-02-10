@@ -8,7 +8,7 @@ defineProps<{
   <div class="relative flex flex-col items-center group">
     <button
       class="flex w-11 h-11 bg-white rounded-full items-center justify-center cursor-pointer hover:bg-zinc-950 hover:text-white duration-300 transition-colors"
-      @click="$emit('click')"
+      @click.stop="$emit('click')"
     >
       <slot />
     </button>

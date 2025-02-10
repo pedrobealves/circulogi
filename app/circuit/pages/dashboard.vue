@@ -224,7 +224,6 @@ useSeoMeta({
         </ContextMenuTrigger>
         <ContextMenuContent class="w-64">
           <ContextMenuItem inset @click="openEdit(circuit.id, circuit.name)">
-            <Trash2 class="text-muted-foreground" />
             Renomear
           </ContextMenuItem>
           <ContextMenuItem inset @click="deleteCircuit(circuit.id)">

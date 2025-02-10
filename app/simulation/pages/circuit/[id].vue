@@ -14,6 +14,7 @@ import Properties from "~/simulation/components/Properties.vue";
 const circuitStore = useSimulationStore();
 const { uploadThumbnail } = useSaveThumbnail();
 const { getFillColor, getStrokeColor, getRadius, showType } = useNodeStyle();
+const user = useSupabaseUser();
 
 const { configs } = useNetworkGraph();
 
@@ -37,6 +38,10 @@ try {
 } catch (error) {
   console.error("Erro ao buscar o circuito:", error);
 }
+
+const isOwner = computed(() => {
+  return user.value?.id === circuitStore.circuit?.userId;
+});
 
 onMounted(() => {
   circuitStore.loadCircuit(circuitStore.circuit?.content);
@@ -95,12 +100,12 @@ useSeoMeta({
         />
       </template>
     </v-network-graph>
-    <InteractiveContainer />
-    <ToolbarOptions />
+    <InteractiveContainer v-if="isOwner" />
+    <ToolbarOptions v-if="isOwner" />
     <Tutorial />
     <TopBarContainer />
     <Share />
-    <Properties />
+    <Properties v-if="isOwner" />
   </div>
 </template>
 

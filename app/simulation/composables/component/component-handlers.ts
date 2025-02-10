@@ -59,6 +59,17 @@ const componentHandlers: Record<string, ComponentHandler> = {
       return true;
     },
   },
+  INPUT_TEXT: {
+    handleUpdate: async (value: any) => {
+      const store = useSimulationStore();
+
+      if (store.selectedNodes) {
+        store.selectedNodes.configurations.INPUT_TEXT = value;
+      }
+
+      return true;
+    },
+  },
 };
 
 export const registerComponentHandler = (

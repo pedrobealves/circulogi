@@ -1,17 +1,19 @@
+// useComponentProperties.ts
 import { useComponentLoader } from "./component-loader";
 import { useComponentValidation } from "./component-validation";
 import { getComponentHandler } from "./component-handlers";
+import { type Component } from "./component-schema";
 
 export function useComponentProperties() {
   const { getComponent } = useComponentLoader();
 
   async function getPropertyValue(componentType: string, propertyName: string) {
-    const component = await getComponent(componentType);
+    const component: Component | null = await getComponent(componentType);
     return component?.properties.find((p) => p.name === propertyName)?.default;
   }
 
   async function getProprieties(componentType: string) {
-    const component = await getComponent(componentType);
+    const component: Component | null = await getComponent(componentType);
     return component?.properties;
   }
 
@@ -21,7 +23,7 @@ export function useComponentProperties() {
     value: any
   ) {
     const { validateProperty } = useComponentValidation();
-    const component = await getComponent(componentType);
+    const component: Component | null = await getComponent(componentType);
 
     if (!component) return false;
 
@@ -32,7 +34,9 @@ export function useComponentProperties() {
 
     const handler = getComponentHandler(propertyName);
     if (!handler) {
-      console.warn(`No handler found for component type: ${propertyName}`);
+      console.warn(
+        `Nenhum handler encontrado para a propriedade: ${propertyName}`
+      );
       return false;
     }
 
