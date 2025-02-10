@@ -6,7 +6,7 @@
     {
       "name": "INPUT_TEXT",
       "type": "TEXT",
-      "label": "Text Input",
+      "label": "Texto",
       "default": "",
       "min": 2,
       "max": 80

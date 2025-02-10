@@ -131,20 +131,12 @@ const onMouseLeaveContainer = () => {
   });
 };
 
-const isDialogOpen = ref(false);
-
 function addNewComponent(type: string) {
   if (type === "TEXT") {
-    isDialogOpen.value = true;
-    console.log(isDialogOpen.value);
+    circuitStore.createNoteNode();
     return;
   }
   circuitStore.createComponentAndAdd(type as NodeType);
-}
-
-function onSubmit(values: any) {
-  isDialogOpen.value = false;
-  circuitStore.createNoteNode(values.text);
 }
 </script>
 
@@ -213,33 +205,4 @@ function onSubmit(values: any) {
       </div>
     </div>
   </div>
-  <Form v-slot="{ handleSubmit }">
-    <Dialog v-model:open="isDialogOpen">
-      <DialogContent
-        class="sm:max-w-[425px] grid-rows-[auto_minmax(0,1fr)_auto] p-0 max-h-[90dvh]"
-      >
-        <DialogHeader class="p-6 pb-0">
-          <DialogTitle>Nota</DialogTitle>
-          <DialogDescription> Escreva sua nota abaixo </DialogDescription>
-        </DialogHeader>
-        <div class="grid gap-4 py-4 overflow-y-auto px-6">
-          <div class="flex flex-col justify-between h-28">
-            <form id="dialogForm" @submit="handleSubmit($event, onSubmit)">
-              <FormField v-slot="{ componentField }" name="text">
-                <FormItem>
-                  <FormControl>
-                    <Textarea type="text" v-bind="componentField" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-            </form>
-          </div>
-        </div>
-        <DialogFooter class="p-6 pt-0">
-          <Button type="submit" form="dialogForm"> Salvar </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </Form>
 </template>

@@ -54,6 +54,8 @@ import { useSimulationStore } from "~/simulation/stores/simulation";
 import { showProperties } from "@/simulation/utils/is-component";
 import { useComponentProperties } from "@/simulation/composables/component/component-properties";
 
+import { useNodeSelect } from "@/simulation/composables/events/event-node-select";
+
 const circuitStore = useSimulationStore();
 const { getProprieties, updateProperty } = useComponentProperties();
 
@@ -80,9 +82,10 @@ const isComponentType = computed(() => {
   return showProperties(circuitStore.selectedNodes);
 });
 
-const handlePropertyUpdate = (field: any, value: any) => {
+const handlePropertyUpdate = async (field: any, value: any) => {
   if (circuitStore.selectedNodes) {
-    updateProperty(circuitStore.selectedNodes.type, field, value);
+    await updateProperty(circuitStore.selectedNodes.type, field, value);
+    await useNodeSelect().updateLabels();
     circuitStore.save();
   }
 };
