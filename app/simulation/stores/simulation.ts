@@ -126,7 +126,8 @@ export const useSimulationStore = defineStore("simulation", () => {
     }
   }
 
-  function createNoteNode(text: string) {
+  function createNoteNode() {
+    console.log("Creating note node");
     const component = useNodeFactory().createNode({
       type: NodeType.TEXT,
       role: NodeRole.COMPONENT,
@@ -134,7 +135,7 @@ export const useSimulationStore = defineStore("simulation", () => {
       maxInputs: 0,
       maxOutputs: 0,
     });
-    component.configurations.INPUT_TEXT = text;
+    component.configurations.INPUT_TEXT = "TEXT";
     nodesStore.addNode(component);
     save();
   }

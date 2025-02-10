@@ -61,6 +61,7 @@ export function useNodeSelect() {
   }
 
   function updateLabels() {
+    console.log("updateLabels");
     // Função para atualizar o label de um nó, seja AND, OR, NOT, etc.
     const updateNodeLabel = (node: any) => {
       if (!node.inputs[0]) return;
@@ -89,16 +90,16 @@ export function useNodeSelect() {
       }
 
       // Lógica para tratar nós binários (AND, OR, etc.)
-      if (
-        mainNode.inputs.length >= 2 &&
-        mainNode.inputs[0] &&
-        mainNode.inputs[1]
-      ) {
-        const inputNode1 = circuitStore.getNode(mainNode.inputs[0]);
-        const inputNode2 = circuitStore.getNode(mainNode.inputs[1]);
-        if (inputNode1 && inputNode2) {
+      if (mainNode.inputs.length >= 2) {
+        // Obtém todos os nós de entrada
+        const inputNodes = mainNode.inputs
+          .map((inputId) => circuitStore.getNode(inputId)) // Busca os nós pelos IDs
+          .filter((inputNode) => inputNode !== undefined); // Remove entradas inválidas
+
+        if (inputNodes.length === mainNode.inputs.length) {
+          // Garante que todos os inputs são válidos antes de gerar o label
           node.label = generateNodeLabel(
-            [inputNode1.label ?? "", inputNode2.label ?? ""],
+            inputNodes.map((inputNode) => inputNode.label ?? ""), // Coleta os labels dos nós de entrada
             mainNode.type
           );
         }
@@ -135,6 +136,7 @@ export function useNodeSelect() {
   return {
     selectNode,
     nodesConnHighlight,
+    updateLabels,
     deselectNodes,
     nodesConnDeHighlight,
   };
