@@ -61,7 +61,6 @@ export function useNodeSelect() {
   }
 
   function updateLabels() {
-    console.log("updateLabels");
     // Função para atualizar o label de um nó, seja AND, OR, NOT, etc.
     const updateNodeLabel = (node: any) => {
       if (!node.inputs[0]) return;

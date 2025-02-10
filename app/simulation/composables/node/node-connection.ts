@@ -30,8 +30,6 @@ export function useConnectionNodes() {
     const targetOutputs =
       sourceNode.type === "OUT" ? targetNode.outputs : sourceNode.outputs;
 
-    //console.log(sourceInputs, targetOutputs);
-
     if (sourceInputs[0] === targetOutputs[0]) {
       console.log("Conexão inválida!");
       return;
@@ -73,8 +71,6 @@ export function useConnectionNodes() {
       edgesStore.addEdge(createEdge(connectionNode.id, outputId));
 
       const node = nodesStore.getNode(outputId);
-
-      console.log(node?.id);
 
       if (node) {
         node.inputs = node.inputs.filter(
