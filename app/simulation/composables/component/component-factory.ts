@@ -258,6 +258,8 @@ export function useComponentFactory() {
       maxOutputs: 1,
     });
 
+    mainNode.configurations.OUTPUT_NUMBER = 1;
+
     const inNode = nodeFactory.createNode({
       type: NodeType.IN,
       role: NodeRole.COMPONENT,
